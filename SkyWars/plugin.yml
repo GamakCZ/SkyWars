@@ -1,0 +1,15 @@
+name: SkyWars
+api: [3.0.0-ALPHA11, 3.0.0-ALPHA12]
+version: 1.0.0
+main: skywars\SkyWars
+author: GamakCZ
+description: SkyWars minigame plugin
+
+permissions:
+  sw.cmd:
+    description: Permission to all SkyWars commands
+    default: op
+    children:
+      sw.cmd.help:
+        description: Permission for more informations at /sw help
+        default: op
