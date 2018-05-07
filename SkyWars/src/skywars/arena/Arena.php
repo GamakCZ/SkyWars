@@ -21,6 +21,10 @@ declare(strict_types=1);
 namespace skywars\arena;
 
 use pocketmine\event\Listener;
+use pocketmine\level\Level;
+use pocketmine\level\Position;
+use pocketmine\Player;
+use skywars\math\Vector3;
 use skywars\SkyWars;
 
 /**
@@ -38,6 +42,12 @@ class Arena implements Listener {
     /** @var bool $setting */
     public $setup = false;
 
+    /** @var Player[] $players */
+    public $players = [];
+
+    /** @var ?Level $level */
+    public $level = \null;
+
     /**
      * Arena constructor.
      * @param SkyWars $plugin
@@ -45,10 +55,28 @@ class Arena implements Listener {
      */
     public function __construct(SkyWars $plugin, array $arenaFileData) {
         $this->plugin = $plugin;
-        $this->setup = empty($arenaFileData);
+        $this->setup = empty($arenaFileData) || !$arenaFileData["enabled"];
         $plugin->getServer()->getPluginManager()->registerEvents($this, $plugin);
 
         if($this->setup) $this->createBasicData();
+    }
+
+    /**
+     * @param Player $player
+     */
+    public function joinToArena(Player $player) {
+        if(!$this->data["enabled"]) {
+            $player->sendMessage("§c> Arena is under setup!");
+            return;
+        }
+
+        $selected = false;
+        for($lS = 0; $lS < $this->data["slots"]; $lS++) {
+            if(!$selected) {
+                $this->players[$index = "spawn-{$lS}"] = $player;
+                $player->teleport(Position::fromObject(Vector3::fromString($this->data["spawns"][$index]), $this->level));
+            }
+        }
     }
 
     private function createBasicData() {
@@ -56,7 +84,8 @@ class Arena implements Listener {
             "level" => null,
             "slots" => 12,
             "spawns" => [],
-            ""
+            "enabled" => false,
+            "joinsign" => []
         ];
     }
 }

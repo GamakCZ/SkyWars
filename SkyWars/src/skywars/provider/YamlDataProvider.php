@@ -59,6 +59,14 @@ class YamlDataProvider {
         }
     }
 
+    public function saveArenas() {
+        foreach ($this->plugin->arenas as $fileName => $arena) {
+            $config = new Config($this->getDataFolder() . "arenas" . DIRECTORY_SEPARATOR . $fileName . ".yml", Config::YAML);
+            $config->setAll($arena->data);
+            $config->save(\false);
+        }
+    }
+
     /**
      * @return string $dataFolder
      */

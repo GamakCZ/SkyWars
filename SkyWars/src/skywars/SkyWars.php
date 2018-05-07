@@ -22,10 +22,11 @@ namespace skywars;
 
 use pocketmine\command\Command;
 use pocketmine\event\Listener;
-use pocketmine\Player;
+use pocketmine\event\player\PlayerChatEvent;
 use pocketmine\plugin\PluginBase;
 use skywars\arena\Arena;
 use skywars\commands\SkyWarsCommand;
+use skywars\math\Vector3;
 use skywars\provider\YamlDataProvider;
 
 /**
@@ -43,12 +44,61 @@ class SkyWars extends PluginBase implements Listener {
     /** @var Arena[] $arenas */
     public $arenas = [];
 
-    /** @var Player[] $setters */
+    /** @var Arena[] $setters */
     public $setters = [];
 
     public function onEnable() {
         $this->getServer() -> getPluginManager()->registerEvents($this, $this);
         $this->dataProvider = new YamlDataProvider($this);
         $this->commands[] = new SkyWarsCommand($this);
+    }
+
+    /**
+     * @param PlayerChatEvent $event
+     */
+    public function onChat(PlayerChatEvent $event) {
+        $player = $event->getPlayer();
+
+        if(!isset($this->setters[$player->getName()])) {
+            return;
+        }
+
+        $event->setCancelled(\true);
+
+        $args = explode(" ", $event->getMessage());
+
+        /** @var Arena $arena */
+        $arena = $this->setters[$player->getName()];
+
+        switch ($args[0]) {
+            case "help":
+                $player->sendMessage("§a> SkyWars setup help:\n".
+                "§7help : Displays list of available setup commands\n" .
+                "§7slots : Update arena slots\n".
+                "§7spawn : Set arena spawns\n".
+                "§7joinsign : Set arena joinsign");
+                break;
+            case "slots":
+                if(!isset($args[1])) {
+                    $player->sendMessage("§cUsage: §7slots <int: slots>");
+                    break;
+                }
+                $arena->data["slots"] = (int)$args[1];
+                $player->sendMessage("§a> Slots updated to $args[1]!");
+                break;
+            case "spawn":
+                if(!isset($args[1])) {
+                    $player->sendMessage("§cUsage: §7setspawn <int: spawn>");
+                    break;
+                }
+                if((int)$args[1] > $arena->data["slots"]) {
+                    $player->sendMessage("§cThere are only {$arena->data["slots"]} slots!");
+                    break;
+                }
+
+                $arena->data["spawns"]["spawn{$args[1]}"] = (new Vector3($player->getX(), $player->getY(), $player->getZ()))->__toString();
+                $player->sendMessage("§a> Spawn $args[1] set to X: " . (string)round($player->getX()) . " Y: " . (string)round($player->getY()) . " Z: " . (string)round($player->getZ()));
+                break;
+        }
     }
 }

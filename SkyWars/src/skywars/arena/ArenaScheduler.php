@@ -40,5 +40,6 @@ class ArenaScheduler extends Task {
     }
 
     public function onRun(int $currentTick) {
+
     }
 }

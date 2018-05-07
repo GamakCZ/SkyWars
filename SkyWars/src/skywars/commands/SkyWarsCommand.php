@@ -64,7 +64,7 @@ class SkyWarsCommand extends Command implements PluginIdentifiableCommand {
 
         switch ($args[0]) {
             case "help":
-                if($sender->hasPermission("sw.cmd.help")) {
+                if(!$sender->hasPermission("sw.cmd.help")) {
                     $sender->sendMessage("§cYou have not permissions to use this command!");
                     break;
                 }
@@ -75,7 +75,7 @@ class SkyWarsCommand extends Command implements PluginIdentifiableCommand {
 
                 break;
             case "create":
-                if($sender->hasPermission("sw.cmd.create")) {
+                if(!$sender->hasPermission("sw.cmd.create")) {
                     $sender->sendMessage("§cYou have not permissions to use this command!");
                     break;
                 }
@@ -88,7 +88,13 @@ class SkyWarsCommand extends Command implements PluginIdentifiableCommand {
                     break;
                 }
                 $this->plugin->arenas[$args[1]] = new Arena($this->plugin, []);
+                $sender->sendMessage("§a> Arena $args[1] created!");
                 break;
+            case "set":
+                if(!$sender->hasPermission("sw.cmd.set")) {
+                    $sender->sendMessage("§cYou have not permissions to use this command!");
+                    break;
+                }
         }
 
     }
