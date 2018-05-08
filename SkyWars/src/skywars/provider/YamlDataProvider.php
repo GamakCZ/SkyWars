@@ -53,7 +53,7 @@ class YamlDataProvider {
     }
 
     public function loadArenas() {
-        foreach (glob($this->getDataFolder() . DIRECTORY_SEPARATOR . "*.yml") as $arenaFile) {
+        foreach (glob($this->getDataFolder() . "arenas" . DIRECTORY_SEPARATOR . "*.yml") as $arenaFile) {
             $config = new Config($arenaFile, Config::YAML);
             $this->plugin->arenas[basename($arenaFile, ".yml")] = new Arena($this->plugin, $config->getAll(\false));
         }

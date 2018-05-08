@@ -60,7 +60,7 @@ class Arena implements Listener {
     /** @var Player[] $players */
     public $players = [];
 
-    /** @var ?Level $level */
+    /** @var Level $level */
     public $level = null;
 
     /**
@@ -73,7 +73,9 @@ class Arena implements Listener {
         $this->setup = !$this->enable(\false);
 
         if($this->setup) {
-            $this->createBasicData();
+            if(empty($this->data)) {
+                $this->createBasicData();
+            }
         }
         else {
             $this->loadArena();

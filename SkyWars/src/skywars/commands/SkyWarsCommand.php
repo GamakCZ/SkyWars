@@ -23,6 +23,7 @@ namespace skywars\commands;
 use pocketmine\command\Command;
 use pocketmine\command\CommandSender;
 use pocketmine\command\PluginIdentifiableCommand;
+use pocketmine\Player;
 use pocketmine\plugin\Plugin;
 use pocketmine\plugin\PluginBase;
 use skywars\arena\Arena;
@@ -96,6 +97,10 @@ class SkyWarsCommand extends Command implements PluginIdentifiableCommand {
                     $sender->sendMessage("§cYou have not permissions to use this command!");
                     break;
                 }
+                if(!$sender instanceof Player) {
+                    $sender->sendMessage("§c> This command can be used only in-game!");
+                    break;
+                }
                 if(!isset($args[1])) {
                     $sender->sendMessage("§cUsage: §7/sw set <arenaName>");
                     break;
@@ -109,8 +114,8 @@ class SkyWarsCommand extends Command implements PluginIdentifiableCommand {
                     break;
                 }
                 $sender->sendMessage("§a> You are joined setup mode.\n".
-                    "§7- use §lhelp §rto display available commands"  .
-                    "§7- or §lleave §rto leave setup mode");
+                    "§7- use §lhelp §r§7to display available commands\n"  .
+                    "§7- or §ldone §r§7to leave setup mode");
                 $this->plugin->setters[$sender->getName()] = $this->plugin->arenas[$args[1]];
                 break;
             case "arenas":

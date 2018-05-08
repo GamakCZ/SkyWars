@@ -54,7 +54,7 @@ class SkyWars extends PluginBase implements Listener {
     public function onEnable() {
         $this->getServer() -> getPluginManager()->registerEvents($this, $this);
         $this->dataProvider = new YamlDataProvider($this);
-        $this->commands[] = new SkyWarsCommand($this);
+        $this->getServer()->getCommandMap()->register("SkyWars", $this->commands[] = new SkyWarsCommand($this));
     }
 
     public function onDisable() {
@@ -82,8 +82,10 @@ class SkyWars extends PluginBase implements Listener {
                 $player->sendMessage("§a> SkyWars setup help:\n".
                 "§7help : Displays list of available setup commands\n" .
                 "§7slots : Update arena slots\n".
+                "§7level : Set arena level\n".
                 "§7spawn : Set arena spawns\n".
-                "§7joinsign : Set arena joinsign");
+                "§7joinsign : Set arena joinsign\n".
+                "§7enable : Enable the arena");
                 break;
             case "slots":
                 if(!isset($args[1])) {
@@ -92,6 +94,18 @@ class SkyWars extends PluginBase implements Listener {
                 }
                 $arena->data["slots"] = (int)$args[1];
                 $player->sendMessage("§a> Slots updated to $args[1]!");
+                break;
+            case "level":
+                if(!isset($args[1])) {
+                    $player->sendMessage("§cUsage: §7level <levelName>");
+                    break;
+                }
+                if(!$this->getServer()->isLevelGenerated($args[1])) {
+                    $player->sendMessage("§c> Level $args[1] does not found!");
+                    break;
+                }
+                $player->sendMessage("§a> Arena level updated to $args[1]!");
+                $arena->data["level"] = $args[1];
                 break;
             case "spawn":
                 if(!isset($args[1])) {
@@ -103,19 +117,35 @@ class SkyWars extends PluginBase implements Listener {
                     break;
                 }
 
-                $arena->data["spawns"]["spawn{$args[1]}"] = (new Vector3($player->getX(), $player->getY(), $player->getZ()))->__toString();
+                $arena->data["spawns"]["spawn-{$args[1]}"] = (new Vector3($player->getX(), $player->getY(), $player->getZ()))->__toString();
                 $player->sendMessage("§a> Spawn $args[1] set to X: " . (string)round($player->getX()) . " Y: " . (string)round($player->getY()) . " Z: " . (string)round($player->getZ()));
                 break;
             case "joinsign":
                 $player->sendMessage("§a> Break block to set joinsign!");
                 $this->setupData[$player->getName()] = 0;
                 break;
-            case "leave":
+            case "enable":
+                if(!$arena->setup) {
+                    $player->sendMessage("§6> Arena is already enabled!");
+                    break;
+                }
+                if(!$arena->enable()) {
+                    $player->sendMessage("§c> Could not load arena, there are missing information!");
+                    break;
+                }
+                $player->sendMessage("§a> Arena enabled!");
+                break;
+            case "done":
                 $player->sendMessage("§a> You are successfully leaved setup mode!");
                 unset($this->setters[$player->getName()]);
                 if(isset($this->setupData[$player->getName()])) {
                     unset($this->setupData[$player->getName()]);
                 }
+                break;
+            default:
+                $player->sendMessage("§6> You are in setup mode.\n".
+                    "§7- use §lhelp §r§7to display available commands\n"  .
+                    "§7- or §ldone §r§7to leave setup mode");
                 break;
         }
     }
@@ -132,6 +162,7 @@ class SkyWars extends PluginBase implements Listener {
                     $this->setters[$player->getName()]->data["joinsign"] = [(new Vector3($block->getX(), $block->getY(), $block->getZ()))->__toString(), $block->getLevel()->getFolderName()];
                     $player->sendMessage("§a> Join sign updated!");
                     unset($this->setupData[$player->getName()]);
+                    $event->setCancelled(\true);
                     break;
             }
         }

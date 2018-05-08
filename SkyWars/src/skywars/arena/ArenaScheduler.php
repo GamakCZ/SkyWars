@@ -20,8 +20,12 @@ declare(strict_types=1);
 
 namespace skywars\arena;
 
+use pocketmine\level\Level;
+use pocketmine\level\Position;
 use pocketmine\scheduler\Task;
+use pocketmine\tile\Sign;
 use skywars\math\Time;
+use skywars\math\Vector3;
 
 /**
  * Class ArenaScheduler
@@ -53,6 +57,10 @@ class ArenaScheduler extends Task {
      * @param int $currentTick
      */
     public function onRun(int $currentTick) {
+        $this->reloadSign();
+
+        if($this->plugin->setup) return;
+
         switch ($this->plugin->phase) {
             case Arena::PHASE_LOBBY:
                 if(count($this->plugin->players) > 2) {
@@ -71,6 +79,55 @@ class ArenaScheduler extends Task {
             case Arena::PHASE_RESTART:
                 break;
         }
+    }
+
+    public function reloadSign() {
+        if(!is_array($this->plugin->data["joinsign"])) return;
+
+        $signPos = Position::fromObject(Vector3::fromString($this->plugin->data["joinsign"][0]), $this->plugin->plugin->getServer()->getLevelByName($this->plugin->data["joinsign"][1]));
+
+        if(!$signPos instanceof Level) return;
+
+        $signText = [
+            "§e§lSkyWars",
+            "§9[ §b? / ? §9]",
+            "§6Setup",
+            "§6Wait few sec..."
+        ];
+
+        if($this->plugin->setup) {
+            /** @var Sign $sign */
+            $sign = $signPos->getLevel()->getTile($signPos);
+            $sign->setText($signText[0], $signText[1], $signText[2], $signText[3]);
+            return;
+        }
+
+        $signText[1] = "§9[ §b" . count($this->plugin->players) . " / " . $this->plugin->data["slots"] . " §9]";
+
+        switch ($this->plugin->phase) {
+            case Arena::PHASE_LOBBY:
+                if(count($this->plugin->players) >= $this->plugin->data["slots"]) {
+                    $signText[2] = "§6Full";
+                    $signText[3] = "§7§oArena is full.";
+                }
+                else {
+                    $signText[2] = "§aJoin";
+                    $signText[3] = "§7§oClick to join!";
+                }
+                break;
+            case Arena::PHASE_GAME:
+                $signText[2] = "§5InGame";
+                $signText[3] = "§8Map: §7{$this->plugin->level->getFolderName()}";
+                break;
+            case Arena::PHASE_RESTART:
+                $signText[2] = "§cRestarting...";
+                $signText[3] = "§7Wait few sec.";
+                break;
+        }
+
+        /** @var Sign $sign */
+        $sign = $signPos->getLevel()->getTile($signPos);
+        $sign->setText($signText[0], $signText[1], $signText[2], $signText[3]);
     }
 
     public function reloadTimer() {
