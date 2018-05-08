@@ -21,6 +21,7 @@ declare(strict_types=1);
 namespace skywars;
 
 use pocketmine\command\Command;
+use pocketmine\event\block\BlockBreakEvent;
 use pocketmine\event\Listener;
 use pocketmine\event\player\PlayerChatEvent;
 use pocketmine\plugin\PluginBase;
@@ -47,10 +48,17 @@ class SkyWars extends PluginBase implements Listener {
     /** @var Arena[] $setters */
     public $setters = [];
 
+    /** @var int[] $setupData */
+    public $setupData = [];
+
     public function onEnable() {
         $this->getServer() -> getPluginManager()->registerEvents($this, $this);
         $this->dataProvider = new YamlDataProvider($this);
         $this->commands[] = new SkyWarsCommand($this);
+    }
+
+    public function onDisable() {
+        $this->dataProvider->saveArenas();
     }
 
     /**
@@ -64,7 +72,6 @@ class SkyWars extends PluginBase implements Listener {
         }
 
         $event->setCancelled(\true);
-
         $args = explode(" ", $event->getMessage());
 
         /** @var Arena $arena */
@@ -99,6 +106,34 @@ class SkyWars extends PluginBase implements Listener {
                 $arena->data["spawns"]["spawn{$args[1]}"] = (new Vector3($player->getX(), $player->getY(), $player->getZ()))->__toString();
                 $player->sendMessage("§a> Spawn $args[1] set to X: " . (string)round($player->getX()) . " Y: " . (string)round($player->getY()) . " Z: " . (string)round($player->getZ()));
                 break;
+            case "joinsign":
+                $player->sendMessage("§a> Break block to set joinsign!");
+                $this->setupData[$player->getName()] = 0;
+                break;
+            case "leave":
+                $player->sendMessage("§a> You are successfully leaved setup mode!");
+                unset($this->setters[$player->getName()]);
+                if(isset($this->setupData[$player->getName()])) {
+                    unset($this->setupData[$player->getName()]);
+                }
+                break;
+        }
+    }
+
+    /**
+     * @param BlockBreakEvent $event
+     */
+    public function onBreak(BlockBreakEvent $event) {
+        $player = $event->getPlayer();
+        $block = $event->getBlock();
+        if(isset($this->setupData[$player->getName()])) {
+            switch ($this->setupData[$player->getName()]) {
+                case 0:
+                    $this->setters[$player->getName()]->data["joinsign"] = [(new Vector3($block->getX(), $block->getY(), $block->getZ()))->__toString(), $block->getLevel()->getFolderName()];
+                    $player->sendMessage("§a> Join sign updated!");
+                    unset($this->setupData[$player->getName()]);
+                    break;
+            }
         }
     }
 }

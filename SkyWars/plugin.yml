@@ -4,6 +4,7 @@ version: 1.0.0
 main: skywars\SkyWars
 author: GamakCZ
 description: SkyWars minigame plugin
+website: https://github.com/GamakCZ/SkyWars
 
 permissions:
   sw.cmd:
@@ -11,5 +12,14 @@ permissions:
     default: op
     children:
       sw.cmd.help:
-        description: Permission for more informations at /sw help
+        description: Permission for /sw help
+        default: op
+      sw.cmd.create:
+        description: Permission for /sw create
+        default: op
+      sw.cmd.set:
+        description: Permission for /sw set
+        default: op
+      sw.cmd.arenas:
+        description: Permission for /sw arenas
         default: op

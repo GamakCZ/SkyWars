@@ -71,7 +71,8 @@ class SkyWarsCommand extends Command implements PluginIdentifiableCommand {
                 $sender->sendMessage("§a> SkyWars commands:\n" .
                     "§7/sw help : Displays list of SkyWars commands\n".
                     "§7/sw create : Create SkyWars arena\n".
-                    "§7/sw set : Set SkyWars arena\n");
+                    "§7/sw set : Set SkyWars arena\n".
+                    "§7/sw arenas : Displays list of arenas");
 
                 break;
             case "create":
@@ -95,6 +96,39 @@ class SkyWarsCommand extends Command implements PluginIdentifiableCommand {
                     $sender->sendMessage("§cYou have not permissions to use this command!");
                     break;
                 }
+                if(!isset($args[1])) {
+                    $sender->sendMessage("§cUsage: §7/sw set <arenaName>");
+                    break;
+                }
+                if(isset($this->plugin->setters[$sender->getName()])) {
+                    $sender->sendMessage("§c> You are already in setup mode!");
+                    break;
+                }
+                if(!isset($this->plugin->arenas[$args[1]])) {
+                    $sender->sendMessage("§c> Arena $args[1] does not found!");
+                    break;
+                }
+                $sender->sendMessage("§a> You are joined setup mode.\n".
+                    "§7- use §lhelp §rto display available commands"  .
+                    "§7- or §lleave §rto leave setup mode");
+                $this->plugin->setters[$sender->getName()] = $this->plugin->arenas[$args[1]];
+                break;
+            case "arenas":
+                if(!$sender->hasPermission("sw.cmd.arenas")) {
+                    $sender->sendMessage("§cYou have not permissions to use this command!");
+                    break;
+                }
+                $list = "§7> Arenas:\n";
+                foreach ($this->plugin->arenas as $name => $arena) {
+                    if($arena->setup) {
+                        $list .= "§7- $name : §cdisabled\n";
+                    }
+                    else {
+                        $list .= "§7- $name : §aenabled\n";
+                    }
+                }
+                $sender->sendMessage($list);
+                break;
         }
 
     }
