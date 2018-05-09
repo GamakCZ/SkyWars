@@ -38,6 +38,6 @@ class Vector3 extends \pocketmine\math\Vector3 {
      * @return Vector3
      */
     public static function fromString(string $string) {
-        return new Vector3(explode(",", $string)[0], explode(",", $string)[1], explode(",", $string)[2]);
+        return new Vector3((int)explode(",", $string)[0], (int)explode(",", $string)[1], (int)explode(",", $string)[2]);
     }
 }

@@ -64,13 +64,14 @@ class ArenaScheduler extends Task {
         switch ($this->plugin->phase) {
             case Arena::PHASE_LOBBY:
                 if(count($this->plugin->players) > 2) {
-                    $this->plugin->broadcastMessage("§a> Starting in " . Time::calculateTime($this->startTime) . "sec.");
+                    $this->plugin->broadcastMessage("§a> Starting in " . Time::calculateTime($this->startTime) . " sec.", Arena::MSG_TIP);
+                    $this->startTime--;
                     if($this->startTime == 0) {
                         $this->plugin->startGame();
                     }
                 }
                 else {
-                    $this->plugin->broadcastMessage("§c> You need more players to start a game!");
+                    $this->plugin->broadcastMessage("§c> You need more players to start a game!", Arena::MSG_TIP);
                     $this->startTime = 40;
                 }
                 break;
@@ -82,11 +83,11 @@ class ArenaScheduler extends Task {
     }
 
     public function reloadSign() {
-        if(!is_array($this->plugin->data["joinsign"])) return;
+        if(!is_array($this->plugin->data["joinsign"]) || empty($this->plugin->data["joinsign"])) return;
 
         $signPos = Position::fromObject(Vector3::fromString($this->plugin->data["joinsign"][0]), $this->plugin->plugin->getServer()->getLevelByName($this->plugin->data["joinsign"][1]));
 
-        if(!$signPos instanceof Level) return;
+        if(!$signPos->getLevel() instanceof Level) return;
 
         $signText = [
             "§e§lSkyWars",

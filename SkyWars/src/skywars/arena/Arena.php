@@ -20,10 +20,12 @@ declare(strict_types=1);
 
 namespace skywars\arena;
 
+use pocketmine\event\entity\EntityLevelChangeEvent;
 use pocketmine\event\Listener;
 use pocketmine\event\player\PlayerExhaustEvent;
 use pocketmine\event\player\PlayerInteractEvent;
 use pocketmine\event\player\PlayerMoveEvent;
+use pocketmine\event\player\PlayerQuitEvent;
 use pocketmine\level\Level;
 use pocketmine\level\Position;
 use pocketmine\Player;
@@ -48,6 +50,9 @@ class Arena implements Listener {
     /** @var SkyWars $plugin */
     public $plugin;
 
+    /** @var ArenaScheduler $scheduler */
+    public $scheduler;
+
     /** @var int $phase */
     public $phase = 0;
 
@@ -70,7 +75,10 @@ class Arena implements Listener {
      */
     public function __construct(SkyWars $plugin, array $arenaFileData) {
         $this->plugin = $plugin;
+        $this->data = $arenaFileData;
         $this->setup = !$this->enable(\false);
+
+        $this->plugin->getServer()->getScheduler()->scheduleRepeatingTask($this->scheduler = new ArenaScheduler($this), 20);
 
         if($this->setup) {
             if(empty($this->data)) {
@@ -96,12 +104,18 @@ class Arena implements Listener {
             return;
         }
 
+        if($this->inGame($player)) {
+            $player->sendMessage("§c> You are already in game!");
+            return;
+        }
+
         $selected = false;
-        for($lS = 0; $lS < $this->data["slots"]; $lS++) {
+        for($lS = 1; $lS < $this->data["slots"]; $lS++) {
             if(!$selected) {
                 if(!isset($this->players[$index = "spawn-{$lS}"])) {
-                    $this->players[$index] = $player;
                     $player->teleport(Position::fromObject(Vector3::fromString($this->data["spawns"][$index]), $this->level));
+                    $this->players[$index] = $player;
+                    $selected = true;
                 }
             }
         }
@@ -115,6 +129,46 @@ class Arena implements Listener {
         $player->setFood(20);
 
         $this->broadcastMessage("§a> Player {$player->getName()} joined! §7[".count($this->players)."/{$this->data["slots"]}]");
+    }
+
+    /**
+     * @param Player $player
+     * @param string $quitMsg
+     */
+    public function disconnectPlayer(Player $player, string $quitMsg = "") {
+        switch ($this->phase) {
+            case Arena::PHASE_LOBBY:
+                $index = "";
+                foreach ($this->players as $i => $p) {
+                    if($p->getId() == $player->getId()) {
+                        $index = $i;
+                    }
+                }
+                if($index != "") {
+                    unset($this->players[$index]);
+                }
+                break;
+            default:
+                unset($this->players[$player->getName()]);
+                break;
+        }
+
+        $player->removeAllEffects();
+
+        $player->setGamemode($this->plugin->getServer()->getDefaultGamemode());
+
+        $player->setHealth(20);
+        $player->setFood(20);
+
+        $player->getInventory()->clearAll();
+        $player->getArmorInventory()->clearAll();
+        $player->getCursorInventory()->clearAll();
+
+        $player->teleport($this->plugin->getServer()->getDefaultLevel()->getSpawnLocation());
+
+        if($quitMsg != "") {
+            $player->sendMessage("§a> $quitMsg");
+        }
     }
 
     public function startGame() {
@@ -227,10 +281,33 @@ class Arena implements Listener {
 
         $signPos = Position::fromObject(Vector3::fromString($this->data["joinsign"][0]), $this->plugin->getServer()->getLevelByName($this->data["joinsign"][1]));
 
-        if(!$signPos->getLevel() instanceof Level) return;
+        if(!$signPos->getLevel() instanceof Level) {
+            $this->plugin->getLogger()->info("ARENA DEBUG: signpos level is not level!");
+            return;
+        }
 
         if($event->getBlock()->getLevel()->getId() == $signPos->getLevel()->getId() && $event->getBlock()->equals($signPos)) {
             $this->joinToArena($player);
+        }
+    }
+
+    /**
+     * @param PlayerQuitEvent $event
+     */
+    public function onQuit(PlayerQuitEvent $event) {
+        if($this->inGame($event->getPlayer())) {
+            $this->disconnectPlayer($event->getPlayer());
+        }
+    }
+
+    /**
+     * @param EntityLevelChangeEvent $event
+     */
+    public function onLevelChange(EntityLevelChangeEvent $event) {
+        $player = $event->getEntity();
+        if(!$player instanceof Player) return;
+        if($this->inGame($player)) {
+            $this->disconnectPlayer($player, "You are successfully leaved arena!");
         }
     }
 
@@ -243,8 +320,13 @@ class Arena implements Listener {
             return;
         }
 
+        if(!$restart) {
+            $this->plugin->getServer()->getPluginManager()->registerEvents($this, $this->plugin);
+        }
+
         if($restart) {
             $this->plugin->getServer()->unloadLevel($this->level, \true);
+            $this->scheduler->reloadTimer();
         }
 
         if(!$this->plugin->getServer()->isLevelLoaded($this->data["level"])) {
