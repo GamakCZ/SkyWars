@@ -112,6 +112,10 @@ class SkyWars extends PluginBase implements Listener {
                     $player->sendMessage("§cUsage: §7setspawn <int: spawn>");
                     break;
                 }
+                if(!is_numeric($args[1])) {
+                    $player->sendMessage("§cType number!");
+                    break;
+                }
                 if((int)$args[1] > $arena->data["slots"]) {
                     $player->sendMessage("§cThere are only {$arena->data["slots"]} slots!");
                     break;

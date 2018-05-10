@@ -66,7 +66,7 @@ class ArenaScheduler extends Task {
 
         switch ($this->plugin->phase) {
             case Arena::PHASE_LOBBY:
-                if(count($this->plugin->players) > 2) {
+                if(count($this->plugin->players) >= 2) {
                     $this->plugin->broadcastMessage("§a> Starting in " . Time::calculateTime($this->startTime) . " sec.", Arena::MSG_TIP);
                     $this->startTime--;
                     if($this->startTime == 0) {
@@ -79,7 +79,7 @@ class ArenaScheduler extends Task {
                 }
                 break;
             case Arena::PHASE_GAME:
-                $this->plugin->broadcastMessage("§a> There are " . count($this->plugin->players) . " players, time to end: " . Time::calculateTime($this->gameTime) . "");
+                $this->plugin->broadcastMessage("§a> There are " . count($this->plugin->players) . " players, time to end: " . Time::calculateTime($this->gameTime) . "", Arena::MSG_TIP);
                 switch ($this->gameTime) {
                     case 15 * 60:
                         $this->plugin->broadcastMessage("§a> All chests will be refilled in 5 min.");
@@ -120,6 +120,7 @@ class ArenaScheduler extends Task {
                         $this->plugin->plugin->getServer()->loadLevel($this->plugin->data["level"]);
                         break;
                     case -6:
+                        $this->plugin->level = $this->plugin->plugin->getServer()->getLevelByName($this->plugin->data["level"]);
                         $this->reloadTimer();
                         $this->plugin->phase = Arena::PHASE_LOBBY;
                         break;

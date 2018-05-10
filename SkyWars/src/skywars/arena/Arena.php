@@ -36,6 +36,7 @@ use pocketmine\Player;
 use pocketmine\plugin\Plugin;
 use pocketmine\Server;
 use pocketmine\tile\Chest;
+use pocketmine\tile\Tile;
 use skywars\event\PlayerArenaWinEvent;
 use skywars\math\Vector3;
 use skywars\SkyWars;
@@ -198,6 +199,8 @@ class Arena implements Listener {
         $this->players = $players;
         $this->phase = 1;
 
+        $this->fillChests();
+
         $this->broadcastMessage("Game Started!", self::MSG_TITLE);
     }
 
@@ -272,7 +275,24 @@ class Arena implements Listener {
         $fillInv = function (ChestInventory $inv) {
             $fillSlot = function (ChestInventory $inv, int $slot) {
                 $id = self::getChestItems()[$index = rand(0, 4)][rand(0, (int)(count(self::getChestItems()[$index])-1))];
-                $inv->setItem($slot, Item::get($id));
+                switch ($index) {
+                    case 0:
+                        $count = 1;
+                        break;
+                    case 1:
+                        $count = 1;
+                        break;
+                    case 2:
+                        $count = rand(5, 64);
+                        break;
+                    case 3:
+                        $count = rand(1, 9);
+                        break;
+                    default:
+                        $count = 0;
+                        break;
+                }
+                $inv->setItem($slot, Item::get($id, 0, $count));
             };
 
             $inv->clearAll();
@@ -330,6 +350,17 @@ class Arena implements Listener {
      */
     public function onInteract(PlayerInteractEvent $event) {
         $player = $event->getPlayer();
+        $block = $event->getBlock();
+        if(!$block->getLevel()->getTile($block) instanceof Tile) {
+            return;
+        }
+
+        $signPos = Position::fromObject(Vector3::fromString($this->data["joinsign"][0]), $this->plugin->getServer()->getLevelByName($this->data["joinsign"][1]));
+
+        if($signPos->equals($block) && $signPos->getLevel()->getId() == $block->getLevel()->getId()) {
+            return;
+        }
+
         if($this->phase == self::PHASE_GAME) {
             $player->sendMessage("§c> Arena is in-game");
             return;
