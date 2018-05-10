@@ -5,10 +5,10 @@
 	<a href="https://discord.gg/uwBf2jS">
         <img src="https://img.shields.io/badge/chat-on%20discord-7289da.svg" alt="discord">
     </a>
-    <a href="https://github.com/VookyTeam/Vooky/blob/master/LICENSE">
+    <a href="https://github.com/GamakCZ/SkyWars/blob/master/LICENSE">
         <img src="https://img.shields.io/badge/license-Apache%20License%202.0-yellowgreen.svg" alt="license">
     </a>
-    <a href="https://poggit.pmmp.io/ci/VookyTeam/Vooky/Vooky">
+    <a href="https://poggit.pmmp.io/ci/GamakCZ/SkyWars/SkyWars">
         <img src="https://poggit.pmmp.io/ci.shield/GamakCZ/SkyWars/SkyWars" alt="poggit-ci">
     </a>
     <br><br>
