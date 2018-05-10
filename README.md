@@ -26,6 +26,8 @@
 
 ### Releases:
 
+- **This plugin needs test, please submit ALL issues [here](https://github.com/GamakCZ/SkyWars/issues)**
+
 | Version | Zip Download | Phar Download |
 | --- | --- | --- |
 | 1.0.0 | Was not released | Was not released |
@@ -48,7 +50,7 @@
 2. Join the setup mode (command `/sw set <arenaName>`)
 3. There are setup commands (they are without `/`), you can use them to set the arena
 
-- Setup commands:
+- _Setup commands_:
 
 | Command | Description |
 | --- | --- |
@@ -63,12 +65,87 @@
 <div align="center">
 	<h2>Commands:</h2>
 </div>
+<br>
 
 <p align="center">  
 
+```yml
     Commands:
-        - /sw help
+        - /sw help:
     	    - Description: Displays all SkyWars commands
-    	    - Permission: sw.cmd.help
-
+    	    - Permission: sw.cmd.help (OP)
+		- /sw create:
+			- Description: Create new arena
+			- Permission: sw.cmd.create (OP)
+			- Usage: /sw set <arenaName>
+		- /sw set:
+			- Description: Command allows setup arena
+			- Permission: sw.cmd.set (OP)
+			- Usage: /sw set <arenaName>
+			- This command can be used only in-game
+		- /sw arenas:
+			- Description: Displays list of all arenas
+			- Permission: sw.cmd.arenas (OP)
+```
 </p>
+
+<div align="center">
+	<h2>Permissions</h2>
+</div>
+<br>
+
+<p align="center">
+
+```yml
+    sw.cmd:  
+		description: Permission to all SkyWars commands  
+		default: op  
+		children:  
+			sw.cmd.help:
+				description: Permission for /sw help  
+			    default: op  
+		    sw.cmd.create:  
+				description: Permission for /sw create  
+			    default: op  
+			sw.cmd.set:  
+				description: Permission for /sw set  
+			    default: op  
+			sw.cmd.arenas:  
+				description: Permission for /sw arenas  
+			    default: op
+```
+</p>
+
+<div align="center">
+	<h2>API</h2>
+</div>
+<br>
+
+- <h3>Events:</h3>
+
+	- [PlayerArenaWinEvent](https://github.com/GamakCZ/SkyWars/blob/master/SkyWars/src/skywars/event/PlayerArenaWinEvent.php)
+		```php
+		/**  
+		 * Arena constructor.
+		 * @param Server $server  
+		 * @param Plugin $plugin  
+		 */
+		 public function __construct(Server $server, Plugin $plugin) {  
+			 $server->getPluginManager()->registerEvents($this, $plugin);  
+		 }  
+  
+		/**  
+		 * @param PlayerArenaWinEvent $event  
+		 */
+		public function onWin(PlayerArenaWinEvent $event) {  
+			  $player = $event->getPlayer();  
+			  $this->addCoins($player, 100);  
+			  $player->sendMessage("§a> You won 100 coins!");  
+		}  
+	   /**  
+		 * @param Player $player  
+		 * @param int $coins  
+		 */
+		 public function addCoins(Player $player, int $coins) {  
+		 }
+	```

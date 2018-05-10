@@ -33,6 +33,8 @@ use pocketmine\item\Item;
 use pocketmine\level\Level;
 use pocketmine\level\Position;
 use pocketmine\Player;
+use pocketmine\plugin\Plugin;
+use pocketmine\Server;
 use pocketmine\tile\Chest;
 use skywars\event\PlayerArenaWinEvent;
 use skywars\math\Vector3;
@@ -374,6 +376,7 @@ class Arena implements Listener {
         $player = $event->getPlayer();
         if(isset($this->toRespawn[$player->getName()])) {
             $event->setRespawnPosition($this->plugin->getServer()->getDefaultLevel()->getSpawnLocation());
+            unset($this->toRespawn[$player->getName()]);
         }
     }
 
