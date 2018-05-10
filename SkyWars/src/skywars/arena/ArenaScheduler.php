@@ -45,6 +45,9 @@ class ArenaScheduler extends Task {
     /** @var int $restartTime */
     public $restartTime = 10;
 
+    /** @var array $restartData */
+    public $restartData = [];
+
     /**
      * ArenaScheduler constructor.
      * @param Arena $plugin
@@ -76,8 +79,51 @@ class ArenaScheduler extends Task {
                 }
                 break;
             case Arena::PHASE_GAME:
+                $this->plugin->broadcastMessage("§a> There are " . count($this->plugin->players) . " players, time to end: " . Time::calculateTime($this->gameTime) . "");
+                switch ($this->gameTime) {
+                    case 15 * 60:
+                        $this->plugin->broadcastMessage("§a> All chests will be refilled in 5 min.");
+                        break;
+                    case 11 * 60:
+                        $this->plugin->broadcastMessage("§a> All chest will be refilled in 1 min.");
+                        break;
+                    case 10 * 60:
+                        $this->plugin->broadcastMessage("§a> All chests are refilled.");
+                        break;
+                }
+                if($this->plugin->checkEnd()) $this->plugin->startRestart();
+                $this->gameTime--;
                 break;
             case Arena::PHASE_RESTART:
+                $this->plugin->broadcastMessage("§a> Restarting in {$this->restartTime} sec.", Arena::MSG_TIP);
+                $this->restartTime--;
+
+                switch ($this->restartTime) {
+                    case 0:
+                        foreach ($this->plugin->players as $player) {
+                            $player->teleport($this->plugin->plugin->getServer()->getDefaultLevel()->getSpawnLocation());
+
+                            $player->getInventory()->clearAll();
+                            $player->getArmorInventory()->clearAll();
+                            $player->getCursorInventory()->clearAll();
+
+                            $player->setFood(20);
+                            $player->setHealth(20);
+
+                            $player->setGamemode($this->plugin->plugin->getServer()->getDefaultGamemode());
+                        }
+                        break;
+                    case -1:
+                        $this->plugin->plugin->getServer()->unloadLevel($this->plugin->level, \true);
+                        break;
+                    case -4:
+                        $this->plugin->plugin->getServer()->loadLevel($this->plugin->data["level"]);
+                        break;
+                    case -6:
+                        $this->reloadTimer();
+                        $this->plugin->phase = Arena::PHASE_LOBBY;
+                        break;
+                }
                 break;
         }
     }

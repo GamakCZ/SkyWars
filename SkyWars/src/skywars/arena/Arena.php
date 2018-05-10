@@ -22,13 +22,19 @@ namespace skywars\arena;
 
 use pocketmine\event\entity\EntityLevelChangeEvent;
 use pocketmine\event\Listener;
+use pocketmine\event\player\PlayerDeathEvent;
 use pocketmine\event\player\PlayerExhaustEvent;
 use pocketmine\event\player\PlayerInteractEvent;
 use pocketmine\event\player\PlayerMoveEvent;
 use pocketmine\event\player\PlayerQuitEvent;
+use pocketmine\event\player\PlayerRespawnEvent;
+use pocketmine\inventory\ChestInventory;
+use pocketmine\item\Item;
 use pocketmine\level\Level;
 use pocketmine\level\Position;
 use pocketmine\Player;
+use pocketmine\tile\Chest;
+use skywars\event\PlayerArenaWinEvent;
 use skywars\math\Vector3;
 use skywars\SkyWars;
 
@@ -64,6 +70,9 @@ class Arena implements Listener {
 
     /** @var Player[] $players */
     public $players = [];
+
+    /** @var Player[] $toRespawn */
+    public $toRespawn = [];
 
     /** @var Level $level */
     public $level = null;
@@ -110,7 +119,7 @@ class Arena implements Listener {
         }
 
         $selected = false;
-        for($lS = 1; $lS < $this->data["slots"]; $lS++) {
+        for($lS = 1; $lS <= $this->data["slots"]; $lS++) {
             if(!$selected) {
                 if(!isset($this->players[$index = "spawn-{$lS}"])) {
                     $player->teleport(Position::fromObject(Vector3::fromString($this->data["spawns"][$index]), $this->level));
@@ -134,8 +143,9 @@ class Arena implements Listener {
     /**
      * @param Player $player
      * @param string $quitMsg
+     * @param bool $death
      */
-    public function disconnectPlayer(Player $player, string $quitMsg = "") {
+    public function disconnectPlayer(Player $player, string $quitMsg = "", bool $death = \false) {
         switch ($this->phase) {
             case Arena::PHASE_LOBBY:
                 $index = "";
@@ -166,6 +176,10 @@ class Arena implements Listener {
 
         $player->teleport($this->plugin->getServer()->getDefaultLevel()->getSpawnLocation());
 
+        if(!$death) {
+            $this->broadcastMessage("§a> Player {$player->getName()} left the game. §7[".count($this->players)."/{$this->data["slots"]}]");
+        }
+
         if($quitMsg != "") {
             $player->sendMessage("§a> $quitMsg");
         }
@@ -183,6 +197,22 @@ class Arena implements Listener {
         $this->phase = 1;
 
         $this->broadcastMessage("Game Started!", self::MSG_TITLE);
+    }
+
+    public function startRestart() {
+        $player = null;
+        foreach ($this->players as $p) {
+            $player = $p;
+        }
+
+        if($player === null || (!$player instanceof Player) || (!$player->isOnline())) {
+            return;
+        }
+
+        $player->addTitle("§aYOU WON!");
+        $this->plugin->getServer()->getPluginManager()->callEvent(new PlayerArenaWinEvent($this->plugin, $player, $this));
+        $this->plugin->getServer()->broadcastMessage("§a[SkyWars] Player {$player->getName()} won the game at {$this->level->getFolderName()}!");
+        $this->phase = self::PHASE_RESTART;
     }
 
     /**
@@ -224,6 +254,38 @@ class Arena implements Listener {
                 case self::MSG_TITLE:
                     $player->addTitle($message, $subMessage);
                     break;
+            }
+        }
+    }
+
+    /**
+     * @return bool $end
+     */
+    public function checkEnd(): bool {
+        return count($this->players) <= 1;
+    }
+
+    public function fillChests() {
+
+        $fillInv = function (ChestInventory $inv) {
+            $fillSlot = function (ChestInventory $inv, int $slot) {
+                $id = self::getChestItems()[$index = rand(0, 4)][rand(0, (int)(count(self::getChestItems()[$index])-1))];
+                $inv->setItem($slot, Item::get($id));
+            };
+
+            $inv->clearAll();
+
+            for($x = 0; $x <= 26; $x++) {
+                if(rand(1, 3) == 1) {
+                    $fillSlot($inv, $x);
+                }
+            }
+        };
+
+        $level = $this->level;
+        foreach ($level->getTiles() as $tile) {
+            if($tile instanceof Chest) {
+                $fillInv($tile->getInventory());
             }
         }
     }
@@ -288,6 +350,30 @@ class Arena implements Listener {
 
         if($event->getBlock()->getLevel()->getId() == $signPos->getLevel()->getId() && $event->getBlock()->equals($signPos)) {
             $this->joinToArena($player);
+        }
+    }
+
+    /**
+     * @param PlayerDeathEvent $event
+     */
+    public function onDeath(PlayerDeathEvent $event) {
+        $player = $event->getPlayer();
+
+        if(!$this->inGame($player)) return;
+
+        $this->toRespawn[$player->getName()] = $player;
+        $this->disconnectPlayer($player, "", true);
+        $this->broadcastMessage("§a> {$event->getDeathMessage()} §7[".count($this->players)."/{$this->data["slots"]}]");
+        $event->setDeathMessage("");
+    }
+
+    /**
+     * @param PlayerRespawnEvent $event
+     */
+    public function onRespawn(PlayerRespawnEvent $event) {
+        $player = $event->getPlayer();
+        if(isset($this->toRespawn[$player->getName()])) {
+            $event->setRespawnPosition($this->plugin->getServer()->getDefaultLevel()->getSpawnLocation());
         }
     }
 
@@ -383,5 +469,28 @@ class Arena implements Listener {
             "enabled" => false,
             "joinsign" => []
         ];
+    }
+
+    /**
+     * @return array $chestItems
+     */
+    public static function getChestItems(): array {
+        $chestItems = [];
+        $chestItems[0] = [
+            256, 257, 258, 267, 268, 269, 270, 271, 272, 273, 274, 275, 276, 277, 278, 279
+        ];
+        $chestItems[1] = [
+            298, 299, 300, 301, 302, 303, 304, 305, 306, 307, 308, 309, 310, 311, 312, 313, 314, 315, 316, 317
+        ];
+        $chestItems[2] = [
+            319, 320, 322, 297, 391, 392, 393, 396, 400, 411, 412, 423, 424
+        ];
+        $chestItems[3] = [
+            1, 2, 3, 4, 5, 12, 13, 14, 15, 16, 17, 18, 82, 35, 45
+        ];
+        $chestItems[4] = [
+            263, 264, 265, 266, 280, 297
+        ];
+        return $chestItems;
     }
 }
