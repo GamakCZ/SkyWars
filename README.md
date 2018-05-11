@@ -70,22 +70,22 @@
 <p align="center">  
 
 ```
-    Commands:
-    	- /sw help:
-    	    - Description: Displays all SkyWars commands
-    	    - Permission: sw.cmd.help (OP)
-		- /sw create:
-			- Description: Create new arena
-			- Permission: sw.cmd.create (OP)
-			- Usage: /sw set <arenaName>
-		- /sw set:
-			- Description: Command allows setup arena
-			- Permission: sw.cmd.set (OP)
-			- Usage: /sw set <arenaName>
-			- This command can be used only in-game
-		- /sw arenas:
-			- Description: Displays list of all arenas
-			- Permission: sw.cmd.arenas (OP)
+Commands:
+    /sw help:
+        Description: Displays all SkyWars commands
+        Permission: sw.cmd.help (OP)
+    /sw create:
+        Description: Create new arena
+        Permission: sw.cmd.create (OP)
+        Usage: /sw set <arenaName>
+    /sw set:
+        Description: Command allows setup arena
+        Permission: sw.cmd.set (OP)
+        Usage: /sw set <arenaName>
+        This command can be used only in-game
+    /sw arenas:
+        Description: Displays list of all arenas
+        Permission: sw.cmd.arenas (OP)
 ```
 </p>
 
@@ -97,22 +97,26 @@
 <p align="center">
 
 ```
-    sw.cmd:  
-	description: Permission to all SkyWars commands  
-	default: op  
-	children:  
-	   	sw.cmd.help:
-		description: Permission for /sw help  
-		default: op  
-		    sw.cmd.create:  
-		    	description: Permission for /sw create  
-			default: op  
-		    sw.cmd.set:  
-			description: Permission for /sw set  
-			default: op  
-		   sw.cmd.arenas:  
-			description: Permission for /sw arenas  
-			   default: op
+sw.cmd:  
+    description: Permission to all SkyWars commands  
+    default: op  
+    children:  
+        sw.cmd.help:
+            description: Permission for /sw help  
+            default: op  
+        sw.cmd.create:  
+            description: Permission for /sw create  
+            default: op
+        sw.cmd.remove:
+            description: Permission for /sw remove
+            default: op
+        sw.cmd.set:  
+            description: Permission for /sw set  
+            default: op  
+        sw.cmd.arenas:  
+            description: Permission for /sw arenas  
+            default: op    
+			
 ```
 </p>
 
@@ -140,8 +144,8 @@
  */
  public function onWin(PlayerArenaWinEvent $event) {  
     $player = $event->getPlayer();  
-	$this->addCoins($player, 100);  
-	$player->sendMessage("§a> You won 100 coins!");  
+    $this->addCoins($player, 100);  
+    $player->sendMessage("§a> You won 100 coins!");  
  }  
 		
 /**  

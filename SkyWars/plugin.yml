@@ -1,5 +1,5 @@
 name: SkyWars
-api: [3.0.0-ALPHA11, 3.0.0-ALPHA12]
+api: [3.0.0-ALPHA12]
 version: 1.0.0
 main: skywars\SkyWars
 author: GamakCZ
@@ -16,6 +16,9 @@ permissions:
         default: op
       sw.cmd.create:
         description: Permission for /sw create
+        default: op
+      sw.cmd.remove:
+        description: Permission for /sw remove
         default: op
       sw.cmd.set:
         description: Permission for /sw set

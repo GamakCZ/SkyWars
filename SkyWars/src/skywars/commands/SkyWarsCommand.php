@@ -92,6 +92,32 @@ class SkyWarsCommand extends Command implements PluginIdentifiableCommand {
                 $this->plugin->arenas[$args[1]] = new Arena($this->plugin, []);
                 $sender->sendMessage("§a> Arena $args[1] created!");
                 break;
+            case "remove":
+                if(!$sender->hasPermission("sw.cmd.remove")) {
+                    $sender->sendMessage("§cYou have not permissions to use this command!");
+                    break;
+                }
+                if(!isset($args[1])) {
+                    $sender->sendMessage("§cUsage: §7/sw remove <arenaName>");
+                    break;
+                }
+                if(!isset($this->plugin->arenas[$args[1]])) {
+                    $sender->sendMessage("§c> Arena $args[1] was not found!");
+                    break;
+                }
+
+                /** @var Arena $arena */
+                $arena = $this->plugin->arenas[$args[1]];
+
+                foreach ($arena->players as $player) {
+                    $player->teleport($this->plugin->getServer()->getDefaultLevel()->getSpawnLocation());
+                }
+
+                if(is_file($file = $this->plugin->getDataFolder() . "arenas" . DIRECTORY_SEPARATOR . $args[1] . ".yml")) unlink($file);
+                unset($this->plugin->arenas[$args[1]]);
+
+                $sender->sendMessage("§a> Arena removed!");
+                break;
             case "set":
                 if(!$sender->hasPermission("sw.cmd.set")) {
                     $sender->sendMessage("§cYou have not permissions to use this command!");

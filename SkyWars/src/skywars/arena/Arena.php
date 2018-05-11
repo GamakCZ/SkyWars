@@ -364,7 +364,7 @@ class Arena implements Listener {
 
         $signPos = Position::fromObject(Vector3::fromString($this->data["joinsign"][0]), $this->plugin->getServer()->getLevelByName($this->data["joinsign"][1]));
 
-        if((!$signPos->equals($block)) && $signPos->getLevel()->getId() != $block->getLevel()->getId()) {
+        if((!$signPos->equals($block)) || $signPos->getLevel()->getId() != $block->getLevel()->getId()) {
             return;
         }
 
