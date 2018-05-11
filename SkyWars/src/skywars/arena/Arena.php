@@ -287,7 +287,10 @@ class Arena implements Listener {
                         $count = rand(5, 64);
                         break;
                     case 3:
-                        $count = rand(1, 9);
+                        $count = rand(5, 64);
+                        break;
+                    case 4:
+                        $count = rand(1, 5);
                         break;
                     default:
                         $count = 0;
@@ -392,10 +395,14 @@ class Arena implements Listener {
 
         if(!$this->inGame($player)) return;
 
+        foreach ($event->getDrops() as $item) {
+            $player->getLevel()->dropItem($player, $item);
+        }
         $this->toRespawn[$player->getName()] = $player;
         $this->disconnectPlayer($player, "", true);
         $this->broadcastMessage("§a> {$event->getDeathMessage()} §7[".count($this->players)."/{$this->data["slots"]}]");
         $event->setDeathMessage("");
+        $event->setDrops([]);
     }
 
     /**
@@ -515,13 +522,13 @@ class Arena implements Listener {
             298, 299, 300, 301, 302, 303, 304, 305, 306, 307, 308, 309, 310, 311, 312, 313, 314, 315, 316, 317
         ];
         $chestItems[2] = [
-            319, 320, 322, 297, 391, 392, 393, 396, 400, 411, 412, 423, 424
+            319, 320, 297, 391, 392, 393, 396, 400, 411, 412, 423, 424,
         ];
         $chestItems[3] = [
             1, 2, 3, 4, 5, 12, 13, 14, 15, 16, 17, 18, 82, 35, 45
         ];
         $chestItems[4] = [
-            263, 264, 265, 266, 280, 297
+            263, 264, 265, 266, 280, 297, 322
         ];
         return $chestItems;
     }
