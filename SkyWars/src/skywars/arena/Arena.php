@@ -20,6 +20,7 @@ declare(strict_types=1);
 
 namespace skywars\arena;
 
+use pocketmine\block\Block;
 use pocketmine\event\entity\EntityLevelChangeEvent;
 use pocketmine\event\Listener;
 use pocketmine\event\player\PlayerDeathEvent;
@@ -351,13 +352,19 @@ class Arena implements Listener {
     public function onInteract(PlayerInteractEvent $event) {
         $player = $event->getPlayer();
         $block = $event->getBlock();
+
+        if($this->inGame($player) && $event->getBlock()->getId() == Block::CHEST && $this->phase == self::PHASE_LOBBY) {
+            $event->setCancelled(\true);
+            return;
+        }
+
         if(!$block->getLevel()->getTile($block) instanceof Tile) {
             return;
         }
 
         $signPos = Position::fromObject(Vector3::fromString($this->data["joinsign"][0]), $this->plugin->getServer()->getLevelByName($this->data["joinsign"][1]));
 
-        if($signPos->equals($block) && $signPos->getLevel()->getId() == $block->getLevel()->getId()) {
+        if((!$signPos->equals($block)) && $signPos->getLevel()->getId() != $block->getLevel()->getId()) {
             return;
         }
 
@@ -374,16 +381,7 @@ class Arena implements Listener {
             return;
         }
 
-        $signPos = Position::fromObject(Vector3::fromString($this->data["joinsign"][0]), $this->plugin->getServer()->getLevelByName($this->data["joinsign"][1]));
-
-        if(!$signPos->getLevel() instanceof Level) {
-            $this->plugin->getLogger()->info("ARENA DEBUG: signpos level is not level!");
-            return;
-        }
-
-        if($event->getBlock()->getLevel()->getId() == $signPos->getLevel()->getId() && $event->getBlock()->equals($signPos)) {
-            $this->joinToArena($player);
-        }
+        $this->joinToArena($player);
     }
 
     /**

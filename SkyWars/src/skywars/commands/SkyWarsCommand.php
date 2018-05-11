@@ -123,6 +123,10 @@ class SkyWarsCommand extends Command implements PluginIdentifiableCommand {
                     $sender->sendMessage("§cYou have not permissions to use this command!");
                     break;
                 }
+                if(count($this->plugin->arenas) === 0) {
+                    $sender->sendMessage("§6> There are 0 arenas.");
+                    break;
+                }
                 $list = "§7> Arenas:\n";
                 foreach ($this->plugin->arenas as $name => $arena) {
                     if($arena->setup) {

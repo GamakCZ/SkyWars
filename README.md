@@ -121,32 +121,40 @@
 </div>
 <br>
 
-- <h3>Events:</h3>
+<h3>Events:</h3>
 
-	- [PlayerArenaWinEvent](https://github.com/GamakCZ/SkyWars/blob/master/SkyWars/src/skywars/event/PlayerArenaWinEvent.php)
-		```php
-		/**  
-		 * Arena constructor.
-		 * @param Server $server  
-		 * @param Plugin $plugin  
-		 */
-		 public function __construct(Server $server, Plugin $plugin) {  
-		 	$server->getPluginManager()->registerEvents($this, $plugin);  
-		 }  
+- [PlayerArenaWinEvent](https://github.com/GamakCZ/SkyWars/blob/master/SkyWars/src/skywars/event/PlayerArenaWinEvent.php)
+
+```php
+/**  
+ * Arena constructor.
+ * @param Server $server  
+ * @param Plugin $plugin  
+ */
+ public function __construct(Server $server, Plugin $plugin) {  
+    $server->getPluginManager()->registerEvents($this, $plugin);  
+ }  
   
-		/**  
-		 * @param PlayerArenaWinEvent $event  
-		 */
-		public function onWin(PlayerArenaWinEvent $event) {  
-			$player = $event->getPlayer();  
-			$this->addCoins($player, 100);  
-			$player->sendMessage("§a> You won 100 coins!");  
-		}  
+/**  
+ * @param PlayerArenaWinEvent $event  
+ */
+ public function onWin(PlayerArenaWinEvent $event) {  
+    $player = $event->getPlayer();  
+	$this->addCoins($player, 100);  
+	$player->sendMessage("§a> You won 100 coins!");  
+ }  
 		
-	        /**  
-		 * @param Player $player  
-		 * @param int $coins  
-		 */
-		 public function addCoins(Player $player, int $coins) {  
-		 }
-	```
+/**  
+ * @param Player $player  
+ * @param int $coins  
+ */
+ public function addCoins(Player $player, int $coins) {}
+```
+
+<div align="center">
+    <h2>Credits</h2>
+</div>
+
+<div align="center">
+    - Icon made by <a href="http://www.freepik.com" title="Freepik">Freepik</a> from <a href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com</a> is licensed by <a href="http://creativecommons.org/licenses/by/3.0/" title="Creative Commons BY 3.0" target="_blank">CC 3.0 BY</a>
+</div>

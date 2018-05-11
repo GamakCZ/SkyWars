@@ -143,6 +143,8 @@ class ArenaScheduler extends Task {
             "§6Wait few sec..."
         ];
 
+        if($signPos->getLevel()->getTile($signPos) === null) return;
+
         if($this->plugin->setup) {
             /** @var Sign $sign */
             $sign = $signPos->getLevel()->getTile($signPos);
