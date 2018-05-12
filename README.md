@@ -50,7 +50,7 @@
 
 - <h3>Video:</h3>
 
-<a align="center" href="https://www.youtube.com/watch?v=KOxbO0EI4MA"><img src="http://img.youtube.com/vi/3tbhWPUFe1c/0.jpg"></a>
+<a align="center" href="https://www.youtube.com/watch?v=3tbhWPUFe1c"><img src="http://img.youtube.com/vi/3tbhWPUFe1c/0.jpg"></a>
 
 - _Setup commands_:
 
