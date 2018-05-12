@@ -159,11 +159,11 @@ class ArenaScheduler extends Task {
             case Arena::PHASE_LOBBY:
                 if(count($this->plugin->players) >= $this->plugin->data["slots"]) {
                     $signText[2] = "§6Full";
-                    $signText[3] = "§7§oArena is full.";
+                    $signText[3] = "§8Map: §7{$this->plugin->level->getFolderName()}";
                 }
                 else {
                     $signText[2] = "§aJoin";
-                    $signText[3] = "§7§oClick to join!";
+                    $signText[3] = "§8Map: §7{$this->plugin->level->getFolderName()}";
                 }
                 break;
             case Arena::PHASE_GAME:
@@ -172,7 +172,7 @@ class ArenaScheduler extends Task {
                 break;
             case Arena::PHASE_RESTART:
                 $signText[2] = "§cRestarting...";
-                $signText[3] = "§7Wait few sec.";
+                $signText[3] = "§8Map: §7{$this->plugin->level->getFolderName()}";
                 break;
         }
 
