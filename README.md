@@ -69,7 +69,7 @@
 
 <p align="center">  
 
-```
+```yaml
 Commands:
     /sw help:
         Description: Displays all SkyWars commands
@@ -78,11 +78,16 @@ Commands:
         Description: Create new arena
         Permission: sw.cmd.create (OP)
         Usage: /sw set <arenaName>
+    /sw remove:
+        Description: Remove arena
+        Permission: sw.cmd.remove (OP)
+        Usage: /sw remove <arenaName>
+        Note: Changes will be after restart
     /sw set:
         Description: Command allows setup arena
         Permission: sw.cmd.set (OP)
         Usage: /sw set <arenaName>
-        This command can be used only in-game
+        Note: This command can be used only in-game
     /sw arenas:
         Description: Displays list of all arenas
         Permission: sw.cmd.arenas (OP)
@@ -96,7 +101,7 @@ Commands:
 
 <p align="center">
 
-```
+```yaml
 sw.cmd:  
     description: Permission to all SkyWars commands  
     default: op  

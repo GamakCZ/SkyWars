@@ -400,7 +400,7 @@ class Arena implements Listener {
         }
         $this->toRespawn[$player->getName()] = $player;
         $this->disconnectPlayer($player, "", true);
-        $this->broadcastMessage("§a> {$event->getDeathMessage()} §7[".count($this->players)."/{$this->data["slots"]}]");
+        $this->broadcastMessage("§a> {$this->plugin->getServer()->getLanguage()->translateString($event->getDeathMessage())} §7[".count($this->players)."/{$this->data["slots"]}]");
         $event->setDeathMessage("");
         $event->setDrops([]);
     }
@@ -531,5 +531,9 @@ class Arena implements Listener {
             263, 264, 265, 266, 280, 297, 322
         ];
         return $chestItems;
+    }
+
+    public function __destruct() {
+        unset($this->scheduler);
     }
 }

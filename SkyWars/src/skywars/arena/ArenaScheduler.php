@@ -121,6 +121,7 @@ class ArenaScheduler extends Task {
                         break;
                     case -6:
                         $this->plugin->level = $this->plugin->plugin->getServer()->getLevelByName($this->plugin->data["level"]);
+                        $this->plugin->level->setAutoSave(false);
                         $this->reloadTimer();
                         $this->plugin->phase = Arena::PHASE_LOBBY;
                         break;
