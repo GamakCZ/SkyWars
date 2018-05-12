@@ -48,6 +48,10 @@
 2. Join the setup mode (command `/sw set <arenaName>`)
 3. There are setup commands (they are without `/`), you can use them to set the arena
 
+- <h3>Video:</h3>
+
+<a align="center" href="https://www.youtube.com/watch?v=KOxbO0EI4MA"><img src="http://img.youtube.com/vi/3tbhWPUFe1c/0.jpg"></a>
+
 - _Setup commands_:
 
 | Command | Description |
