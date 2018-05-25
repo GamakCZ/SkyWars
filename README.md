@@ -20,8 +20,6 @@
     <br>
     ✔️ Last PocketMine API support
     <br>
-    ✔️ Fast, without lags
-    <br>
 </div>
 
 ### Releases:
