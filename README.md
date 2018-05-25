@@ -20,10 +20,13 @@
     <br>
     ✔️ Last PocketMine API support
     <br>
+<<<<<<< HEAD
     ✔️ Map reset
     <br>
     ✔️ Chest refill
     <br>
+=======
+>>>>>>> 7a7df47bcdbc0241107ed03f4a9cf2701d896a9d
 </div>
 
 ### Releases:
