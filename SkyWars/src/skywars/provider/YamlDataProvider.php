@@ -20,6 +20,7 @@ declare(strict_types=1);
 
 namespace skywars\provider;
 
+use pocketmine\level\Level;
 use pocketmine\utils\Config;
 use skywars\arena\Arena;
 use skywars\SkyWars;
@@ -50,6 +51,9 @@ class YamlDataProvider {
         if(!is_dir($this->getDataFolder() . "arenas")) {
             @mkdir($this->getDataFolder() . "arenas");
         }
+        if(!is_dir($this->getDataFolder() . "saves")) {
+            @mkdir($this->getDataFolder() . "saves");
+        }
     }
 
     public function loadArenas() {
@@ -61,6 +65,9 @@ class YamlDataProvider {
 
     public function saveArenas() {
         foreach ($this->plugin->arenas as $fileName => $arena) {
+            if($arena->level instanceof Level) {
+                $arena->level->unload(true);
+            }
             $config = new Config($this->getDataFolder() . "arenas" . DIRECTORY_SEPARATOR . $fileName . ".yml", Config::YAML);
             $config->setAll($arena->data);
             $config->save(\false);

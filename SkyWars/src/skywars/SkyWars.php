@@ -24,6 +24,7 @@ use pocketmine\command\Command;
 use pocketmine\event\block\BlockBreakEvent;
 use pocketmine\event\Listener;
 use pocketmine\event\player\PlayerChatEvent;
+use pocketmine\level\Level;
 use pocketmine\plugin\PluginBase;
 use skywars\arena\Arena;
 use skywars\commands\SkyWarsCommand;
@@ -85,6 +86,7 @@ class SkyWars extends PluginBase implements Listener {
                 "§7level : Set arena level\n".
                 "§7spawn : Set arena spawns\n".
                 "§7joinsign : Set arena joinsign\n".
+                "§7savelevel : Saves the arena level\n".
                 "§7enable : Enable the arena");
                 break;
             case "slots":
@@ -127,6 +129,17 @@ class SkyWars extends PluginBase implements Listener {
             case "joinsign":
                 $player->sendMessage("§a> Break block to set joinsign!");
                 $this->setupData[$player->getName()] = 0;
+                break;
+            case "savelevel":
+                if(!$arena->level instanceof Level) {
+                    $player->sendMessage("§c> Error when saving level: world not found.");
+                    if($arena->setup) {
+                        $player->sendMessage("§6> Try save level after loading the arena.");
+                    }
+                    break;
+                }
+                $arena->mapReset->saveMap($arena->level);
+                $player->sendMessage("§a> Level saved!");
                 break;
             case "enable":
                 if(!$arena->setup) {

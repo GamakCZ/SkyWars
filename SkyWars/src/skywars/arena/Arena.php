@@ -34,8 +34,6 @@ use pocketmine\item\Item;
 use pocketmine\level\Level;
 use pocketmine\level\Position;
 use pocketmine\Player;
-use pocketmine\plugin\Plugin;
-use pocketmine\Server;
 use pocketmine\tile\Chest;
 use pocketmine\tile\Tile;
 use skywars\event\PlayerArenaWinEvent;
@@ -62,6 +60,9 @@ class Arena implements Listener {
 
     /** @var ArenaScheduler $scheduler */
     public $scheduler;
+
+    /** @var MapReset $mapReset */
+    public $mapReset;
 
     /** @var int $phase */
     public $phase = 0;
@@ -212,6 +213,7 @@ class Arena implements Listener {
         }
 
         if($player === null || (!$player instanceof Player) || (!$player->isOnline())) {
+            $this->phase = self::PHASE_RESTART;
             return;
         }
 
@@ -445,23 +447,28 @@ class Arena implements Listener {
             return;
         }
 
+        if(!$this->mapReset instanceof MapReset) {
+            $this->mapReset = new MapReset($this);
+        }
+
         if(!$restart) {
             $this->plugin->getServer()->getPluginManager()->registerEvents($this, $this->plugin);
+
+            if(!$this->plugin->getServer()->isLevelLoaded($this->data["level"])) {
+                $this->plugin->getServer()->loadLevel($this->data["level"]);
+            }
+
+            $this->mapReset->saveMap($this->level = $this->plugin->getServer()->getLevelByName($this->data["level"]));
         }
+
+        if(!$this->level instanceof Level) $this->level = $this->mapReset->loadMap($this->data["level"]);
 
         if($restart) {
-            $this->plugin->getServer()->unloadLevel($this->level, \true);
             $this->scheduler->reloadTimer();
+            $this->mapReset->loadMap($this->data["level"]);
         }
 
-        if(!$this->plugin->getServer()->isLevelLoaded($this->data["level"])) {
-            $this->plugin->getServer()->loadLevel($this->data["level"]);
-        }
-
-        $this->level = $this->plugin->getServer()->getLevelByName($this->data["level"]);
-        $this->level->setAutoSave(false);
-
-        $this->phase = 0;
+        $this->phase = static::PHASE_LOBBY;
         $this->players = [];
     }
 

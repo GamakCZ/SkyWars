@@ -111,19 +111,9 @@ class ArenaScheduler extends Task {
                             $player->setHealth(20);
 
                             $player->setGamemode($this->plugin->plugin->getServer()->getDefaultGamemode());
+
+                            $this->plugin->loadArena(true);
                         }
-                        break;
-                    case -1:
-                        $this->plugin->plugin->getServer()->unloadLevel($this->plugin->level, \true);
-                        break;
-                    case -4:
-                        $this->plugin->plugin->getServer()->loadLevel($this->plugin->data["level"]);
-                        break;
-                    case -6:
-                        $this->plugin->level = $this->plugin->plugin->getServer()->getLevelByName($this->plugin->data["level"]);
-                        $this->plugin->level->setAutoSave(false);
-                        $this->reloadTimer();
-                        $this->plugin->phase = Arena::PHASE_LOBBY;
                         break;
                 }
                 break;

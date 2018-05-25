@@ -20,7 +20,9 @@
     <br>
     ✔️ Last PocketMine API support
     <br>
-    ✔️ Fast, without lags
+    ✔️ Map reset
+    <br>
+    ✔️ Chest refill
     <br>
 </div>
 
