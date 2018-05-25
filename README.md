@@ -32,6 +32,7 @@
 | Version | Zip Download | Phar Download |
 | --- | --- | --- |
 | 1.0.0 | [GitHub](https://github.com/GamakCZ/SkyWars/archive/1.0.0.zip) | [GitHub](https://github.com/GamakCZ/SkyWars/releases/download/1.0.0/SkyWars_v1.0.0.phar) |
+| 1.1.0 | Under development | Under development |
 <br>
 
 - **Other released versions [here](https://github.com/GamakCZ/SkyWars/releases)**
