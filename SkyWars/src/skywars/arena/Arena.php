@@ -461,12 +461,14 @@ class Arena implements Listener {
             $this->mapReset->saveMap($this->level = $this->plugin->getServer()->getLevelByName($this->data["level"]));
         }
 
-        if(!$this->level instanceof Level) $this->level = $this->mapReset->loadMap($this->data["level"]);
+
 
         if($restart) {
             $this->scheduler->reloadTimer();
-            $this->mapReset->loadMap($this->data["level"]);
+            $this->level = $this->mapReset->loadMap($this->data["level"]);
         }
+
+        if(!$this->level instanceof Level) $this->level = $this->mapReset->loadMap($this->data["level"]);
 
         $this->phase = static::PHASE_LOBBY;
         $this->players = [];
