@@ -100,6 +100,7 @@ class ArenaScheduler extends Task {
 
                 switch ($this->restartTime) {
                     case 0:
+
                         foreach ($this->plugin->players as $player) {
                             $player->teleport($this->plugin->plugin->getServer()->getDefaultLevel()->getSpawnLocation());
 
@@ -111,9 +112,9 @@ class ArenaScheduler extends Task {
                             $player->setHealth(20);
 
                             $player->setGamemode($this->plugin->plugin->getServer()->getDefaultGamemode());
-
-                            $this->plugin->loadArena(true);
                         }
+                        $this->plugin->loadArena(true);
+                        $this->reloadTimer();
                         break;
                 }
                 break;
