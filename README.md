@@ -26,7 +26,7 @@
     <br>
     
 </div>
-
+<h3>Supports only PMMP</h3>
 ### Releases:
 
 | Version | Zip Download | Phar Download |
