@@ -92,7 +92,7 @@ class Arena implements Listener {
         $this->data = $arenaFileData;
         $this->setup = !$this->enable(\false);
 
-        $this->plugin->getServer()->getScheduler()->scheduleRepeatingTask($this->scheduler = new ArenaScheduler($this), 20);
+        $this->plugin->getScheduler()->scheduleRepeatingTask($this->scheduler = new ArenaScheduler($this), 20);
 
         if($this->setup) {
             if(empty($this->data)) {

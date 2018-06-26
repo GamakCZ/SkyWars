@@ -80,7 +80,7 @@ class SkyWars extends PluginBase implements Listener {
 
         switch ($args[0]) {
             case "help":
-                $player->sendMessage("§a> SkyWars setup help:\n".
+                $player->sendMessage("§a> SkyWars setup help (1/1):\n".
                 "§7help : Displays list of available setup commands\n" .
                 "§7slots : Update arena slots\n".
                 "§7level : Set arena level\n".
@@ -134,7 +134,7 @@ class SkyWars extends PluginBase implements Listener {
                 if(!$arena->level instanceof Level) {
                     $player->sendMessage("§c> Error when saving level: world not found.");
                     if($arena->setup) {
-                        $player->sendMessage("§6> Try save level after loading the arena.");
+                        $player->sendMessage("§6> Try save level after enabling the arena.");
                     }
                     break;
                 }
