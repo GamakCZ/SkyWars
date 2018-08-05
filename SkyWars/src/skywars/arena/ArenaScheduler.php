@@ -22,6 +22,8 @@ namespace skywars\arena;
 
 use pocketmine\level\Level;
 use pocketmine\level\Position;
+use pocketmine\level\sound\AnvilUseSound;
+use pocketmine\level\sound\ClickSound;
 use pocketmine\scheduler\Task;
 use pocketmine\tile\Sign;
 use skywars\math\Time;
@@ -71,6 +73,14 @@ class ArenaScheduler extends Task {
                     $this->startTime--;
                     if($this->startTime == 0) {
                         $this->plugin->startGame();
+                        foreach ($this->plugin->players as $player) {
+                            $this->plugin->level->addSound(new AnvilUseSound($player->asVector3()));
+                        }
+                    }
+                    else {
+                        foreach ($this->plugin->players as $player) {
+                            $this->plugin->level->addSound(new ClickSound($player->asVector3()));
+                        }
                     }
                 }
                 else {

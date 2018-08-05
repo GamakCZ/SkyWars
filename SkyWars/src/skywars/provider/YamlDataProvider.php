@@ -66,7 +66,11 @@ class YamlDataProvider {
     public function saveArenas() {
         foreach ($this->plugin->arenas as $fileName => $arena) {
             if($arena->level instanceof Level) {
-                $arena->level->unload(true);
+                foreach ($arena->players as $player) {
+                    $player->teleport($player->getServer()->getDefaultLevel()->getSpawnLocation());
+                }
+                // must be reseted
+                $arena->mapReset->loadMap($arena->level->getFolderName());
             }
             $config = new Config($this->getDataFolder() . "arenas" . DIRECTORY_SEPARATOR . $fileName . ".yml", Config::YAML);
             $config->setAll($arena->data);

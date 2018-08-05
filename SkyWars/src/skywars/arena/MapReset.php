@@ -53,6 +53,7 @@ class MapReset {
         if(is_file($zipPath)) {
             unlink($zipPath);
         }
+
         $zip->open($zipPath, \ZipArchive::CREATE | \ZipArchive::OVERWRITE);
         $files = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator(realpath($levelPath)), \RecursiveIteratorIterator::LEAVES_ONLY);
 

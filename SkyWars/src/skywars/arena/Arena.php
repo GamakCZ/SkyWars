@@ -21,6 +21,7 @@ declare(strict_types=1);
 namespace skywars\arena;
 
 use pocketmine\block\Block;
+use pocketmine\entity\Attribute;
 use pocketmine\event\entity\EntityLevelChangeEvent;
 use pocketmine\event\Listener;
 use pocketmine\event\player\PlayerDeathEvent;
@@ -33,6 +34,7 @@ use pocketmine\inventory\ChestInventory;
 use pocketmine\item\Item;
 use pocketmine\level\Level;
 use pocketmine\level\Position;
+use pocketmine\network\mcpe\protocol\AdventureSettingsPacket;
 use pocketmine\Player;
 use pocketmine\tile\Chest;
 use pocketmine\tile\Tile;
@@ -463,7 +465,7 @@ class Arena implements Listener {
 
 
 
-        if($restart) {
+        else {
             $this->scheduler->reloadTimer();
             $this->level = $this->mapReset->loadMap($this->data["level"]);
         }
