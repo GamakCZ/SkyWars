@@ -32,7 +32,7 @@
 | Version | Zip Download | Phar Download |
 | --- | --- | --- |
 | 1.0.0 | [GitHub](https://github.com/GamakCZ/SkyWars/archive/1.0.0.zip) | [GitHub](https://github.com/GamakCZ/SkyWars/releases/download/1.0.0/SkyWars_v1.0.0.phar) |
-| 1.1.0 | Under development | Under development |
+| 1.1.0 | [GitHub](https://github.com/GamakCZ/SkyWars/archive/1.1.0.zip) | [GitHub](https://github.com/GamakCZ/SkyWars/releases/download/1.1.0/SkyWars_v1.1.0.phar) |
 <br>
 
 - **Other released versions [here](https://github.com/GamakCZ/SkyWars/releases)**
@@ -67,6 +67,7 @@
 | spawn `<spawnNum.>` | Sets arena spawn position |
 | joinsign | Update joinsign |
 | enable | Enable the arena |
+| savelevel | Saves level to 'levelName.zip' |
 
 <div align="center">
 	<h2>Commands:</h2>
