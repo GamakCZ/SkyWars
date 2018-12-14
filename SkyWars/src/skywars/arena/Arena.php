@@ -129,7 +129,7 @@ class Arena implements Listener {
         for($lS = 1; $lS <= $this->data["slots"]; $lS++) {
             if(!$selected) {
                 if(!isset($this->players[$index = "spawn-{$lS}"])) {
-                    $player->teleport(Position::fromObject(Vector3::fromString($this->data["spawns"][$index]), $this->level));
+                    $player->teleport(Position::fromObject(Vector3::fromString($this->data["spawns"][$index])->add(0.5, 0, 0.5), $this->level));
                     $this->players[$index] = $player;
                     $selected = true;
                 }
@@ -143,6 +143,8 @@ class Arena implements Listener {
         $player->setGamemode($player::ADVENTURE);
         $player->setHealth(20);
         $player->setFood(20);
+        
+        $player->setImmobile(true);
 
         $this->broadcastMessage("§a> Player {$player->getName()} joined! §7[".count($this->players)."/{$this->data["slots"]}]");
     }
@@ -195,8 +197,12 @@ class Arena implements Listener {
     public function startGame() {
         $players = [];
         foreach ($this->players as $player) {
+            if(in_array($player->getLevel()->getBlock($player->subtract(0, 1))->getId(), [Block::GLASS, Block::STAINED_GLASS])) {
+                    $player->getLevel()->setBlock($player->subtract(0, 1), Block::get(0));
+            }
             $players[$player->getName()] = $player;
             $player->setGamemode($player::SURVIVAL);
+            $player->setImmobile(false);
         }
 
 
