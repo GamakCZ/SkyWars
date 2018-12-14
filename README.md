@@ -135,7 +135,7 @@ sw.cmd:
         sw.cmd.set:  
             description: Permission for /sw set  
             default: op  
-	sw.cmd.start:
+        sw.cmd.start:
             description: Permission for /sw start
             default: op      
         sw.cmd.arenas:  
