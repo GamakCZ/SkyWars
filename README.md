@@ -24,6 +24,8 @@
     <br>
     ✔️ Chest refill
     <br>
+    ✔️ Cages
+    <br> 
     
 </div>
 
@@ -95,6 +97,14 @@ Commands:
         Permission: sw.cmd.set (OP)
         Usage: /sw set <arenaName>
         Note: This command can be used only in-game
+    /sw join:
+        Description: Join an arena
+        Permission: sw.cmd.start
+        Usage: /sw start
+        Note: This command can be used only in-game
+    /sw start:
+        Description: Start an arena
+        Permission: sw.cmd.join
     /sw arenas:
         Description: Displays list of all arenas
         Permission: sw.cmd.arenas (OP)
@@ -125,6 +135,9 @@ sw.cmd:
         sw.cmd.set:  
             description: Permission for /sw set  
             default: op  
+	sw.cmd.start:
+            description: Permission for /sw start
+            default: op      
         sw.cmd.arenas:  
             description: Permission for /sw arenas  
             default: op    
