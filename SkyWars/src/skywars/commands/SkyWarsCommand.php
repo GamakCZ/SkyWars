@@ -165,6 +165,29 @@ class SkyWarsCommand extends Command implements PluginIdentifiableCommand {
                 }
                 $sender->sendMessage($list);
                 break;
+            case "join":
+                if(!$sender->hasPermission("sw.cmd.join")) {
+                    $sender->sendMessage("§cYou have not permissions to use this command!");
+                    break;
+                }
+
+                if(!$sender instanceof Player) {
+                    $sender->sendMessage("§c> This command can be used only in-game!");
+                    break;
+                }
+
+                if(!isset($args[1])) {
+                    $sender->sendMessage("§cUsage: §7/sw join <arenaName>");
+                    break;
+                }
+
+                if(!isset($this->plugin->arenas[$args[1]])) {
+                    $sender->sendMessage("§cArena {$args[1]} not found.");
+                    break;
+                }
+
+                $this->plugin->arenas[$args[1]]->joinToArena($sender);
+                break;    
             default:
                 if(!$sender->hasPermission("sw.cmd.help")) {
                     $sender->sendMessage("§cYou have not permissions to use this command!");
