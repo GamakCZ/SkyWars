@@ -70,6 +70,11 @@ class ArenaScheduler extends Task {
             case Arena::PHASE_LOBBY:
                 if(count($this->plugin->players) >= 2) {
                     $this->plugin->broadcastMessage("§a> Starting in " . Time::calculateTime($this->startTime) . " sec.", Arena::MSG_TIP);
+                    if($this->startTime == 5) {
+                      foreach($this->plugin->players as $player){
+                      $player->addTitle("§c". Time::calculateTime($this->startTime) ."§r" , "§bGet ready!");
+                      }
+                    }
                     $this->startTime--;
                     if($this->startTime == 0) {
                         $this->plugin->startGame();
@@ -89,7 +94,7 @@ class ArenaScheduler extends Task {
                 }
                 break;
             case Arena::PHASE_GAME:
-                $this->plugin->broadcastMessage("§a> There are " . count($this->plugin->players) . " players, time to end: " . Time::calculateTime($this->gameTime) . "", Arena::MSG_TIP);
+                $this->plugin->broadcastMessage("               §l§bSky§fWars\n               §r§aPlayers:§f " . count($this->plugin->players) . "\n               §r§aTime:§f " . Time::calculateTime($this->gameTime) . "", Arena::MSG_TIP);
                 switch ($this->gameTime) {
                     case 15 * 60:
                         $this->plugin->broadcastMessage("§a> All chests will be refilled in 5 min.");
