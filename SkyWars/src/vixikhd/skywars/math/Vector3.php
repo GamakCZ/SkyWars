@@ -18,19 +18,26 @@
 
 declare(strict_types=1);
 
-namespace skywars\math;
+namespace vixikhd\skywars\math;
 
 /**
- * Class Time
+ * Class Vector3
  * @package skywars\math
  */
-class Time {
+class Vector3 extends \pocketmine\math\Vector3 {
 
     /**
-     * @param int $time
      * @return string
      */
-    public static function calculateTime(int $time): string {
-        return gmdate("i:s", $time); 
+    public function __toString() {
+        return "$this->x,$this->y,$this->z";
+    }
+
+    /**
+     * @param string $string
+     * @return Vector3
+     */
+    public static function fromString(string $string) {
+        return new Vector3((int)explode(",", $string)[0], (int)explode(",", $string)[1], (int)explode(",", $string)[2]);
     }
 }

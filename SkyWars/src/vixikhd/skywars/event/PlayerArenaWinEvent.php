@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace skywars\event;
+namespace vixikhd\skywars\event;
 
 use pocketmine\event\plugin\PluginEvent;
 use pocketmine\Player;
-use skywars\arena\Arena;
-use skywars\SkyWars;
+use vixikhd\skywars\arena\Arena;
+use vixikhd\skywars\SkyWars;
 
 /**
  * Class PlayerArenaWinEvent

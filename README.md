@@ -110,7 +110,7 @@ Commands:
 
 ```yaml
 sw.cmd:  
-    description: Permission to all SkyWars commands  
+    description: Permissions for all skywars commands
     default: op  
     children:  
         sw.cmd.help:

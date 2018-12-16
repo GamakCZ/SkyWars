@@ -18,7 +18,7 @@
 
 declare(strict_types=1);
 
-namespace skywars\commands;
+namespace vixikhd\skywars\commands;
 
 use pocketmine\command\Command;
 use pocketmine\command\CommandSender;
@@ -26,8 +26,8 @@ use pocketmine\command\PluginIdentifiableCommand;
 use pocketmine\Player;
 use pocketmine\plugin\Plugin;
 use pocketmine\plugin\PluginBase;
-use skywars\arena\Arena;
-use skywars\SkyWars;
+use vixikhd\skywars\arena\Arena;
+use vixikhd\skywars\SkyWars;
 
 /**
  * Class SkyWarsCommand

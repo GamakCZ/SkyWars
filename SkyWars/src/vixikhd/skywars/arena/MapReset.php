@@ -18,7 +18,7 @@
 
 declare(strict_types=1);
 
-namespace skywars\arena;
+namespace vixikhd\skywars\arena;
 
 use pocketmine\level\Level;
 

@@ -18,7 +18,7 @@
 
 declare(strict_types=1);
 
-namespace skywars\arena;
+namespace vixikhd\skywars\arena;
 
 use pocketmine\level\Level;
 use pocketmine\level\Position;
@@ -26,8 +26,8 @@ use pocketmine\level\sound\AnvilUseSound;
 use pocketmine\level\sound\ClickSound;
 use pocketmine\scheduler\Task;
 use pocketmine\tile\Sign;
-use skywars\math\Time;
-use skywars\math\Vector3;
+use vixikhd\skywars\math\Time;
+use vixikhd\skywars\math\Vector3;
 
 /**
  * Class ArenaScheduler

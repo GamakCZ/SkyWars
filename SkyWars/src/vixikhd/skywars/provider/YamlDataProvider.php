@@ -18,12 +18,12 @@
 
 declare(strict_types=1);
 
-namespace skywars\provider;
+namespace vixikhd\skywars\provider;
 
 use pocketmine\level\Level;
 use pocketmine\utils\Config;
-use skywars\arena\Arena;
-use skywars\SkyWars;
+use vixikhd\skywars\arena\Arena;
+use vixikhd\skywars\SkyWars;
 
 /**
  * Class YamlDataProvider

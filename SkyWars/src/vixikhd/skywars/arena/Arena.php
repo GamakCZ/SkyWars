@@ -18,7 +18,7 @@
 
 declare(strict_types=1);
 
-namespace skywars\arena;
+namespace vixikhd\skywars\arena;
 
 use pocketmine\block\Block;
 use pocketmine\entity\Attribute;
@@ -38,9 +38,9 @@ use pocketmine\network\mcpe\protocol\AdventureSettingsPacket;
 use pocketmine\Player;
 use pocketmine\tile\Chest;
 use pocketmine\tile\Tile;
-use skywars\event\PlayerArenaWinEvent;
-use skywars\math\Vector3;
-use skywars\SkyWars;
+use vixikhd\skywars\event\PlayerArenaWinEvent;
+use vixikhd\skywars\math\Vector3;
+use vixikhd\skywars\SkyWars;
 
 /**
  * Class Arena

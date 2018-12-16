@@ -18,7 +18,7 @@
 
 declare(strict_types=1);
 
-namespace skywars;
+namespace vixikhd\skywars;
 
 use pocketmine\command\Command;
 use pocketmine\event\block\BlockBreakEvent;
@@ -26,10 +26,10 @@ use pocketmine\event\Listener;
 use pocketmine\event\player\PlayerChatEvent;
 use pocketmine\level\Level;
 use pocketmine\plugin\PluginBase;
-use skywars\arena\Arena;
-use skywars\commands\SkyWarsCommand;
-use skywars\math\Vector3;
-use skywars\provider\YamlDataProvider;
+use vixikhd\skywars\arena\Arena;
+use vixikhd\skywars\commands\SkyWarsCommand;
+use vixikhd\skywars\math\Vector3;
+use vixikhd\skywars\provider\YamlDataProvider;
 
 /**
  * Class SkyWars
@@ -53,7 +53,7 @@ class SkyWars extends PluginBase implements Listener {
     public $setupData = [];
 
     public function onEnable() {
-        $this->getServer() -> getPluginManager()->registerEvents($this, $this);
+        $this->getServer()->getPluginManager()->registerEvents($this, $this);
         $this->dataProvider = new YamlDataProvider($this);
         $this->getServer()->getCommandMap()->register("SkyWars", $this->commands[] = new SkyWarsCommand($this));
     }
