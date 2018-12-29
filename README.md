@@ -29,17 +29,6 @@
     
 </div>
 
-### Releases:
-
-| Version | Zip Download | Phar Download |
-| --- | --- | --- |
-| 1.0.0 | [GitHub](https://github.com/GamakCZ/SkyWars/archive/1.0.0.zip) | [GitHub](https://github.com/GamakCZ/SkyWars/releases/download/1.0.0/SkyWars_v1.0.0.phar) |
-| 1.1.0 | [GitHub](https://github.com/GamakCZ/SkyWars/archive/1.1.0.zip) | [GitHub](https://github.com/GamakCZ/SkyWars/releases/download/1.1.0/SkyWars_v1.1.0.phar) |
-<br>
-
-- **Other released versions [here](https://github.com/GamakCZ/SkyWars/releases)**
-- **All developement builds on poggit [here](https://poggit.pmmp.io/ci/GamakCZ/SkyWars/SkyWars)**
-
 <div align="center">
 	<h2>How to setup?</h2>
 </div>
