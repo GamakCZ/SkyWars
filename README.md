@@ -18,13 +18,13 @@
     <br>
     ✔️ Fast, without lags
     <br>
-    ✔️ Last PocketMine API support
+    ✔️ Latest PocketMine API support
     <br>
     ✔️ Map reset
     <br>
     ✔️ Chest refill
     <br>
-    ✔️ Cages
+    ✔️ Cage Support
     <br> 
     
 </div>
