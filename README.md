@@ -88,12 +88,12 @@ Commands:
         Note: This command can be used only in-game
     /sw join:
         Description: Join an arena
-        Permission: sw.cmd.start
-        Usage: /sw start
+        Permission: sw.cmd.join
+        Usage: /sw join
         Note: This command can be used only in-game
     /sw start:
         Description: Start an arena
-        Permission: sw.cmd.join
+        Permission: sw.cmd.start
     /sw arenas:
         Description: Displays list of all arenas
         Permission: sw.cmd.arenas (OP)
