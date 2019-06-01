@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Copyright 2018 GamakCZ
+ * Copyright 2018-2019 GamakCZ
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -82,12 +82,12 @@ class SkyWars extends PluginBase implements Listener {
             case "help":
                 $player->sendMessage("§a> SkyWars setup help (1/1):\n".
                 "§7help : Displays list of available setup commands\n" .
-                "§7slots : Update arena slots\n".
-                "§7level : Set arena level\n".
-                "§7spawn : Set arena spawns\n".
-                "§7joinsign : Set arena joinsign\n".
+                "§7slots : Updates arena slots\n".
+                "§7level : Sets arena level\n".
+                "§7spawn : Sets arena spawns\n".
+                "§7joinsign : Sets arena join sign\n".
                 "§7savelevel : Saves the arena level\n".
-                "§7enable : Enable the arena");
+                "§7enable : Enables the arena");
                 break;
             case "slots":
                 if(!isset($args[1])) {
@@ -127,12 +127,12 @@ class SkyWars extends PluginBase implements Listener {
                 $player->sendMessage("§a> Spawn $args[1] set to X: " . (string)round($player->getX()) . " Y: " . (string)round($player->getY()) . " Z: " . (string)round($player->getZ()));
                 break;
             case "joinsign":
-                $player->sendMessage("§a> Break block to set joinsign!");
+                $player->sendMessage("§a> Break block to set join sign!");
                 $this->setupData[$player->getName()] = 0;
                 break;
             case "savelevel":
                 if(!$arena->level instanceof Level) {
-                    $player->sendMessage("§c> Error when saving level: world not found.");
+                    $player->sendMessage("§c> Error while saving the level: world not found.");
                     if($arena->setup) {
                         $player->sendMessage("§6> Try save level after enabling the arena.");
                     }
@@ -153,7 +153,7 @@ class SkyWars extends PluginBase implements Listener {
                 $player->sendMessage("§a> Arena enabled!");
                 break;
             case "done":
-                $player->sendMessage("§a> You are successfully leaved setup mode!");
+                $player->sendMessage("§a> You are successfully left setup mode!");
                 unset($this->setters[$player->getName()]);
                 if(isset($this->setupData[$player->getName()])) {
                     unset($this->setupData[$player->getName()]);

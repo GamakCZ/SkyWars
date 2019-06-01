@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Copyright 2018 GamakCZ
+ * Copyright 2018-2019 GamakCZ
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -436,7 +436,7 @@ class Arena implements Listener {
         $player = $event->getEntity();
         if(!$player instanceof Player) return;
         if($this->inGame($player)) {
-            $this->disconnectPlayer($player, "You are successfully leaved arena!");
+            $this->disconnectPlayer($player, "You have successfully left the arena!");
         }
     }
 
@@ -459,8 +459,6 @@ class Arena implements Listener {
             if(!$this->plugin->getServer()->isLevelLoaded($this->data["level"])) {
                 $this->plugin->getServer()->loadLevel($this->data["level"]);
             }
-
-            $this->mapReset->saveMap($this->level = $this->plugin->getServer()->getLevelByName($this->data["level"]));
         }
 
 

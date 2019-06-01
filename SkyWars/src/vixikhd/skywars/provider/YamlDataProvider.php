@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Copyright 2018 GamakCZ
+ * Copyright 2018-2019 GamakCZ
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -74,7 +74,7 @@ class YamlDataProvider {
             }
             $config = new Config($this->getDataFolder() . "arenas" . DIRECTORY_SEPARATOR . $fileName . ".yml", Config::YAML);
             $config->setAll($arena->data);
-            $config->save(\false);
+            $config->save(false);
         }
     }
 
