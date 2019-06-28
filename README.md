@@ -169,6 +169,27 @@ sw.cmd:
 ```
 
 <div align="center">
+    <h2>SkyWars Pro</h2>
+</div>
+
+**SkyWars Pro is better version of this plugin with lots of new functions:**
+
+- Custom chest refill with enchants
+- Opening cages
+- MySQL, Json, SQLite and YAML data providers
+- Custom messages
+- Kits with EconomyAPI support
+- Spectator mode
+- More commands and permissions
+- Portals to join
+- Lucky blocks
+- More setup commands
+
+**You can buy it [here](https://selly.gg/u/VixikHD)**
+
+
+
+<div align="center">
     <h2>Credits</h2>
 </div>
 
