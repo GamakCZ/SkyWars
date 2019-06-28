@@ -132,14 +132,28 @@ class SkyWars extends PluginBase implements Listener {
                 break;
             case "savelevel":
                 if(!$arena->level instanceof Level) {
-                    $player->sendMessage("§c> Error while saving the level: world not found.");
-                    if($arena->setup) {
-                        $player->sendMessage("§6> Try save level after enabling the arena.");
+                    $levelName = $arena->data["level"];
+                    if(!is_string($levelName) || !$this->getServer()->isLevelGenerated($levelName)) {
+                        errorMessage:
+                        $player->sendMessage("§c> Error while saving the level: world not found.");
+                        if($arena->setup) {
+                            $player->sendMessage("§6> Try save level after enabling the arena.");
+                        }
+                        return;
+                    }
+                    if(!$this->getServer()->isLevelLoaded($levelName)) {
+                        $this->getServer()->loadLevel($levelName);
+                    }
+
+                    try {
+                        $arena->mapReset->saveMap($this->getServer()->getLevelByName($levelName));
+                        $player->sendMessage("§a> Level saved!");
+                    }
+                    catch (\Exception $exception) {
+                        goto errorMessage;
                     }
                     break;
                 }
-                $arena->mapReset->saveMap($arena->level);
-                $player->sendMessage("§a> Level saved!");
                 break;
             case "enable":
                 if(!$arena->setup) {
@@ -151,6 +165,7 @@ class SkyWars extends PluginBase implements Listener {
                     break;
                 }
                 $player->sendMessage("§a> Arena enabled!");
+                $player->sendMessage("§6> Save arena level using 'savelevel' command!");
                 break;
             case "done":
                 $player->sendMessage("§a> You are successfully left setup mode!");

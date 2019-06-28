@@ -147,7 +147,7 @@ class ArenaScheduler extends Task {
 
         if($signPos->getLevel()->getTile($signPos) === null) return;
 
-        if($this->plugin->setup) {
+        if($this->plugin->setup || $this->plugin->level === null) {
             /** @var Sign $sign */
             $sign = $signPos->getLevel()->getTile($signPos);
             $sign->setText($signText[0], $signText[1], $signText[2], $signText[3]);
@@ -179,7 +179,8 @@ class ArenaScheduler extends Task {
 
         /** @var Sign $sign */
         $sign = $signPos->getLevel()->getTile($signPos);
-        $sign->setText($signText[0], $signText[1], $signText[2], $signText[3]);
+        if($sign instanceof Sign) // Chest->setText() doesn't work :D
+            $sign->setText($signText[0], $signText[1], $signText[2], $signText[3]);
     }
 
     public function reloadTimer() {

@@ -84,6 +84,11 @@ class MapReset {
 
         $zipPath = $this->plugin->plugin->getDataFolder() . "saves" . DIRECTORY_SEPARATOR . $folderName . ".zip";
 
+        if(!file_exists($zipPath)) {
+            $this->plugin->plugin->getServer()->getLogger()->error("Could not reload map ($folderName). File wasn't found, try save level in setup mode.");
+            return null;
+        }
+
         $zipArchive = new \ZipArchive();
         $zipArchive->open($zipPath);
         $zipArchive->extractTo($this->plugin->plugin->getServer()->getDataPath() . "worlds");

@@ -152,7 +152,7 @@ class Arena implements Listener {
      * @param string $quitMsg
      * @param bool $death
      */
-    public function disconnectPlayer(Player $player, string $quitMsg = "", bool $death = \false) {
+    public function disconnectPlayer(Player $player, string $quitMsg = "", bool $death = false) {
         switch ($this->phase) {
             case Arena::PHASE_LOBBY:
                 $index = "";
@@ -334,7 +334,7 @@ class Arena implements Listener {
                 }
             }
             if($event->getPlayer()->asVector3()->distance(Vector3::fromString($this->data["spawns"][$index])) > 1) {
-                // $event->setCancelled() will not work
+                // $event->setCancelled() wont work
                 $player->teleport(Vector3::fromString($this->data["spawns"][$index]));
             }
         }
@@ -361,7 +361,7 @@ class Arena implements Listener {
         $block = $event->getBlock();
 
         if($this->inGame($player) && $event->getBlock()->getId() == Block::CHEST && $this->phase == self::PHASE_LOBBY) {
-            $event->setCancelled(\true);
+            $event->setCancelled(true);
             return;
         }
 
@@ -436,7 +436,7 @@ class Arena implements Listener {
         $player = $event->getEntity();
         if(!$player instanceof Player) return;
         if($this->inGame($player)) {
-            $this->disconnectPlayer($player, "You have successfully left the arena!");
+            $this->disconnectPlayer($player, "You have successfully left the game!");
         }
     }
 
@@ -468,7 +468,16 @@ class Arena implements Listener {
             $this->level = $this->mapReset->loadMap($this->data["level"]);
         }
 
-        if(!$this->level instanceof Level) $this->level = $this->mapReset->loadMap($this->data["level"]);
+        if(!$this->level instanceof Level) {
+            $level = $this->mapReset->loadMap($this->data["level"]);
+            if(!$level instanceof Level) {
+                $this->plugin->getLogger()->error("Arena level wasn't found. Try save level in setup mode.");
+                $this->setup = true;
+                return;
+            }
+            $this->level = $level;
+        }
+
 
         $this->phase = static::PHASE_LOBBY;
         $this->players = [];
