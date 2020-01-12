@@ -136,7 +136,7 @@ class ArenaScheduler extends Task {
 
         $signPos = Position::fromObject(Vector3::fromString($this->plugin->data["joinsign"][0]), $this->plugin->plugin->getServer()->getLevelByName($this->plugin->data["joinsign"][1]));
 
-        if(!$signPos->getLevel() instanceof Level) return;
+        if(!$signPos->getLevel() instanceof Level || is_null($this->plugin->level)) return;
 
         $signText = [
             "§e§lSkyWars",
