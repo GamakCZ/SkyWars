@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Copyright 2018-2019 GamakCZ
+ * Copyright 2018-2020 GamakCZ
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -71,9 +71,11 @@ class MapReset {
 
     /**
      * @param string $folderName
-     * @return Level $level
+     * @param bool $justSave
+     *
+     * @return Level|null
      */
-    public function loadMap(string $folderName): ?Level {
+    public function loadMap(string $folderName, bool $justSave = false): ?Level {
         if(!$this->plugin->plugin->getServer()->isLevelGenerated($folderName)) {
             return null;
         }
@@ -93,6 +95,10 @@ class MapReset {
         $zipArchive->open($zipPath);
         $zipArchive->extractTo($this->plugin->plugin->getServer()->getDataPath() . "worlds");
         $zipArchive->close();
+
+        if($justSave) {
+            return null;
+        }
 
         $this->plugin->plugin->getServer()->loadLevel($folderName);
         return $this->plugin->plugin->getServer()->getLevelByName($folderName);

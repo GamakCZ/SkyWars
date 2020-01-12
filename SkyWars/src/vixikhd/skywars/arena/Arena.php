@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Copyright 2018-2019 GamakCZ
+ * Copyright 2018-2020 GamakCZ
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -455,10 +455,6 @@ class Arena implements Listener {
 
         if(!$restart) {
             $this->plugin->getServer()->getPluginManager()->registerEvents($this, $this->plugin);
-
-            if(!$this->plugin->getServer()->isLevelLoaded($this->data["level"])) {
-                $this->plugin->getServer()->loadLevel($this->data["level"]);
-            }
         }
 
 

@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Copyright 2018-2019 GamakCZ
+ * Copyright 2018-2020 GamakCZ
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -70,7 +70,7 @@ class YamlDataProvider {
                     $player->teleport($player->getServer()->getDefaultLevel()->getSpawnLocation());
                 }
                 // must be reseted
-                $arena->mapReset->loadMap($arena->level->getFolderName());
+                $arena->mapReset->loadMap($arena->level->getFolderName(), true);
             }
             $config = new Config($this->getDataFolder() . "arenas" . DIRECTORY_SEPARATOR . $fileName . ".yml", Config::YAML);
             $config->setAll($arena->data);

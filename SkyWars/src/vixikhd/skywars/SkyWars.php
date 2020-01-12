@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Copyright 2018-2019 GamakCZ
+ * Copyright 2018-2020 GamakCZ
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,7 @@ use pocketmine\event\player\PlayerChatEvent;
 use pocketmine\level\Level;
 use pocketmine\plugin\PluginBase;
 use vixikhd\skywars\arena\Arena;
+use vixikhd\skywars\arena\MapReset;
 use vixikhd\skywars\commands\SkyWarsCommand;
 use vixikhd\skywars\math\Vector3;
 use vixikhd\skywars\provider\YamlDataProvider;
@@ -160,15 +161,25 @@ class SkyWars extends PluginBase implements Listener {
                     $player->sendMessage("§6> Arena is already enabled!");
                     break;
                 }
-                if(!$arena->enable()) {
+
+                if(!$arena->enable(false)) {
                     $player->sendMessage("§c> Could not load arena, there are missing information!");
                     break;
                 }
+
+                if($this->getServer()->isLevelGenerated($arena->data["level"])) {
+                    if(!$this->getServer()->isLevelLoaded($arena->data["level"]))
+                        $this->getServer()->loadLevel($arena->data["level"]);
+                    if(!$arena->mapReset instanceof MapReset)
+                        $arena->mapReset = new MapReset($arena);
+                    $arena->mapReset->saveMap($this->getServer()->getLevelByName($arena->data["level"]));
+                }
+
+                $arena->loadArena(false);
                 $player->sendMessage("§a> Arena enabled!");
-                $player->sendMessage("§6> Save arena level using 'savelevel' command!");
                 break;
             case "done":
-                $player->sendMessage("§a> You are successfully left setup mode!");
+                $player->sendMessage("§a> You have successfully left setup mode!");
                 unset($this->setters[$player->getName()]);
                 if(isset($this->setupData[$player->getName()])) {
                     unset($this->setupData[$player->getName()]);
