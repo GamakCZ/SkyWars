@@ -147,6 +147,9 @@ class SkyWars extends PluginBase implements Listener {
                     }
 
                     try {
+                        if(!$arena->mapReset instanceof MapReset) {
+                            goto errorMessage;
+                        }
                         $arena->mapReset->saveMap($this->getServer()->getLevelByName($levelName));
                         $player->sendMessage("§a> Level saved!");
                     }
