@@ -83,6 +83,11 @@ class Arena implements Listener {
 
     /** @var Level $level */
     public $level = null;
+    
+    // 5 Teams for plugin
+    public $reds = [];
+    public $blues = [];
+    public $greens = [];
 
     /**
      * Arena constructor.
@@ -118,6 +123,19 @@ class Arena implements Listener {
         if(count($this->players) >= $this->data["slots"]) {
             $player->sendMessage("§c> Arena is full!");
             return;
+        }
+        
+        if(count($this->reds) >= $this->data["slots_reds"]) {
+            $this->blues[$player->getName()] = $player;
+            unset($this->reds[$player->getName()] = $player;
+                  
+        } elseif(count($this->blues) >= $this->data["slots_blues"]) {
+            $this->reds[$player->getName()] = $player;
+            unset($this->blues[$player->getName()] = $player;
+                  
+        } elseif(count($this->greens) >= $this->data["slots_greens"]) {
+            $this->reds[$player->getName()] = $player;
+            unset($this->greens[$player->getName()] = $player;             
         }
 
         if($this->inGame($player)) {
@@ -169,6 +187,21 @@ class Arena implements Listener {
                 unset($this->players[$player->getName()]);
                 break;
         }
+        
+        if(isset($this->reds[$player->getName()])) {
+            unset($this->reds[$player->getName()]);
+            $player->setDisplayName("" . $player->getName());
+        }
+            
+        if(isset($this->blues[$player->getName()])) {
+            unset($this->blues[$player->getName()]);
+            $player->setDisplayName("" . $player->getName());
+        }
+            
+        if(isset($this->greens[$player->getName()])) {
+            unset($this->greens[$player->getName()]);
+            $player->setDisplayName("" . $player->getName());
+        }
 
         $player->removeAllEffects();
 
@@ -197,6 +230,13 @@ class Arena implements Listener {
         foreach ($this->players as $player) {
             $players[$player->getName()] = $player;
             $player->setGamemode($player::SURVIVAL);
+            
+            if(isset($this->reds[$player->getName()])) $player->setDisplayName("§c" . $player->getName());
+            
+            if(isset($this->blues[$player->getName()])) $player->setDisplayName("§1" . $player->getName());
+            
+            if(isset($this->greens[$player->getName()])) $player->setDisplayName("§a" . $player->getName());
+            
         }
 
 
@@ -221,7 +261,7 @@ class Arena implements Listener {
 
         $player->addTitle("§aYOU WON!");
         $this->plugin->getServer()->getPluginManager()->callEvent(new PlayerArenaWinEvent($this->plugin, $player, $this));
-        $this->plugin->getServer()->broadcastMessage("§a[SkyWars] Player {$player->getName()} won the game at {$this->level->getFolderName()}!");
+        //$this->plugin->getServer()->broadcastMessage("§a[SkyWars] Player {$player->getName()} won the game at {$this->level->getFolderName()}!");
         $this->phase = self::PHASE_RESTART;
     }
 
@@ -272,7 +312,25 @@ class Arena implements Listener {
      * @return bool $end
      */
     public function checkEnd(): bool {
+        
         return count($this->players) <= 1;
+        
+        if (count($this->blues) < 1 || count($this->greens) < 1){       
+			$this->broadcastMessage("Team Red Won!", self::MSG_TITLE);      
+			return true;
+            
+		} elseif (count($this->reds) < 1 || count($this->greens) < 1){
+            
+			$this->broadcastMessage("Team Blue Won!", self::MSG_TITLE);
+			return true;
+            
+		} elseif (count($this->reds) < 1 || count($this->blues) < 1){
+            
+            $this->broadcastMessage("Team Green Won!", self::MSG_TITLE);
+			return true;     
+        }
+        
+        return false;
     }
 
     public function fillChests() {
@@ -414,6 +472,7 @@ class Arena implements Listener {
      */
     public function onRespawn(PlayerRespawnEvent $event) {
         $player = $event->getPlayer();
+        
         if(isset($this->toRespawn[$player->getName()])) {
             $event->setRespawnPosition($this->plugin->getServer()->getDefaultLevel()->getSpawnLocation());
             unset($this->toRespawn[$player->getName()]);
@@ -519,6 +578,9 @@ class Arena implements Listener {
             "level" => null,
             "slots" => 12,
             "spawns" => [],
+            "slots_reds" = 0,
+            "slots_blues" = 0,
+            "slots_greens" = 0,
             "enabled" => false,
             "joinsign" => []
         ];
