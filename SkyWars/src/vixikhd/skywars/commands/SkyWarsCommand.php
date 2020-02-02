@@ -69,11 +69,11 @@ class SkyWarsCommand extends Command implements PluginIdentifiableCommand {
                     $sender->sendMessage("§cYou have not permissions to use this command!");
                     break;
                 }
-                $sender->sendMessage("§a> SkyWars commands:\n" .
-                    "§7/swt help : Displays list of SkyWars commands\n".
-                    "§7/swt create : Create SkyWars arena\n".
-                    "§7/swt remove : Remove SkyWars arena\n".
-                    "§7/swt set : Set SkyWars arena\n".
+                $sender->sendMessage("§a> SkyWars Teams commands:\n" .
+                    "§7/swt help : Displays list of SkyWars Teams commands\n".
+                    "§7/swt create : Create SkyWars Teams arena\n".
+                    "§7/swt remove : Remove SkyWars Teams arena\n".
+                    "§7/swt set : Set SkyWars Teams arena\n".
                     "§7/swt arenas : Displays list of arenas");
 
                 break;
