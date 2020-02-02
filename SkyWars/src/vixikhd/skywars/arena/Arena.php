@@ -191,16 +191,19 @@ class Arena implements Listener {
         if(isset($this->reds[$player->getName()])) {
             unset($this->reds[$player->getName()]);
             $player->setDisplayName("" . $player->getName());
+            $player->setNameTag("" . $player->getName());
         }
             
         if(isset($this->blues[$player->getName()])) {
             unset($this->blues[$player->getName()]);
             $player->setDisplayName("" . $player->getName());
+            $player->setNameTag("" . $player->getName());
         }
             
         if(isset($this->greens[$player->getName()])) {
             unset($this->greens[$player->getName()]);
             $player->setDisplayName("" . $player->getName());
+	    $player->setNameTag("" . $player->getName());
         }
 
         $player->removeAllEffects();
@@ -233,14 +236,17 @@ class Arena implements Listener {
             
             foreach ($this->reds as $reds){
 		$reds->setDisplayName("§c" . $reds->getName());
+		$reds->setNameTag("§c" . $reds->getName());
 	    }
 			
 	    foreach ($this->blues as $blues){
 		$blues->setDisplayName("§1" . $blues->getName());
+		$blues->setNameTag("§1" . $blues->getName());
 	    }
 			
 	    foreach ($this->greens as $greens){
 		$greens->setDisplayName("§a" . $greens->getName());
+		$greens->setNameTag("§a" . $greens->getName());
 	    }
             
         }
@@ -322,8 +328,6 @@ class Arena implements Listener {
      * @return bool $end
      */
     public function checkEnd(): bool {
-        
-        return count($this->players) <= 1;
         
         if (count($this->blues) < 1 || count($this->greens) < 1){       
 			$this->broadcastMessage("Team Red Won!", self::MSG_TITLE);      
