@@ -44,7 +44,7 @@ class SkyWarsCommand extends Command implements PluginIdentifiableCommand {
      */
     public function __construct(SkyWars $plugin) {
         $this->plugin = $plugin;
-        parent::__construct("skywars", "SkyWars commands", \null, ["sw"]);
+        parent::__construct("skywarsteam", "SkyWarsTeam commands", \null, ["swt"]);
     }
 
     /**
@@ -59,7 +59,7 @@ class SkyWarsCommand extends Command implements PluginIdentifiableCommand {
             return;
         }
         if(!isset($args[0])) {
-            $sender->sendMessage("§cUsage: §7/sw help");
+            $sender->sendMessage("§cUsage: §7/swt help");
             return;
         }
 
@@ -70,11 +70,11 @@ class SkyWarsCommand extends Command implements PluginIdentifiableCommand {
                     break;
                 }
                 $sender->sendMessage("§a> SkyWars commands:\n" .
-                    "§7/sw help : Displays list of SkyWars commands\n".
-                    "§7/sw create : Create SkyWars arena\n".
-                    "§7/sw remove : Remove SkyWars arena\n".
-                    "§7/sw set : Set SkyWars arena\n".
-                    "§7/sw arenas : Displays list of arenas");
+                    "§7/swt help : Displays list of SkyWars commands\n".
+                    "§7/swt create : Create SkyWars arena\n".
+                    "§7/swt remove : Remove SkyWars arena\n".
+                    "§7/swt set : Set SkyWars arena\n".
+                    "§7/swt arenas : Displays list of arenas");
 
                 break;
             case "create":
@@ -83,7 +83,7 @@ class SkyWarsCommand extends Command implements PluginIdentifiableCommand {
                     break;
                 }
                 if(!isset($args[1])) {
-                    $sender->sendMessage("§cUsage: §7/sw create <arenaName>");
+                    $sender->sendMessage("§cUsage: §7/swt create <arenaName>");
                     break;
                 }
                 if(isset($this->plugin->arenas[$args[1]])) {
@@ -129,7 +129,7 @@ class SkyWarsCommand extends Command implements PluginIdentifiableCommand {
                     break;
                 }
                 if(!isset($args[1])) {
-                    $sender->sendMessage("§cUsage: §7/sw set <arenaName>");
+                    $sender->sendMessage("§cUsage: §7/swt set <arenaName>");
                     break;
                 }
                 if(isset($this->plugin->setters[$sender->getName()])) {
@@ -170,7 +170,7 @@ class SkyWarsCommand extends Command implements PluginIdentifiableCommand {
                     $sender->sendMessage("§cYou have not permissions to use this command!");
                     break;
                 }
-                $sender->sendMessage("§cUsage: §7/sw help");
+                $sender->sendMessage("§cUsage: §7/swt help");
                 break;
         }
 
