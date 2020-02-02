@@ -231,11 +231,17 @@ class Arena implements Listener {
             $players[$player->getName()] = $player;
             $player->setGamemode($player::SURVIVAL);
             
-            if(isset($this->reds[$player->getName()])) $player->setDisplayName("§c" . $player->getName());
-            
-            if(isset($this->blues[$player->getName()])) $player->setDisplayName("§1" . $player->getName());
-            
-            if(isset($this->greens[$player->getName()])) $player->setDisplayName("§a" . $player->getName());
+            foreach ($this->reds as $reds){
+		$reds->setDisplayName("§c" . $reds->getName());
+	    }
+			
+	    foreach ($this->blues as $blues){
+		$blues->setDisplayName("§1" . $blues->getName());
+	    }
+			
+	    foreach ($this->greens as $greens){
+		$greens->setDisplayName("§a" . $greens->getName());
+	    }
             
         }
 
@@ -263,7 +269,7 @@ class Arena implements Listener {
 	$this->blues = null;
 	$this->greens = null;
 	    
-        $player->addTitle("§aYOU WON!");
+        //$player->addTitle("§aYOU WON!");
         $this->plugin->getServer()->getPluginManager()->callEvent(new PlayerArenaWinEvent($this->plugin, $player, $this));
         //$this->plugin->getServer()->broadcastMessage("§a[SkyWars] Player {$player->getName()} won the game at {$this->level->getFolderName()}!");
         $this->phase = self::PHASE_RESTART;
