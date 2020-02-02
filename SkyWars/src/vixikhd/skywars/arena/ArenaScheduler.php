@@ -139,7 +139,7 @@ class ArenaScheduler extends Task {
         if(!$signPos->getLevel() instanceof Level || is_null($this->plugin->level)) return;
 
         $signText = [
-            "§e§lSkyWars",
+            "§e§lSkyWars Teams",
             "§9[ §b? / ? §9]",
             "§6Setup",
             "§6Wait few sec..."
