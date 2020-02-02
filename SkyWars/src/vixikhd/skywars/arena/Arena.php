@@ -127,15 +127,15 @@ class Arena implements Listener {
         
         if(count($this->reds) >= $this->data["slots_reds"]) {
             $this->blues[$player->getName()] = $player;
-            unset($this->reds[$player->getName()] = $player;
+            unset($this->reds[$player->getName()]) = $player;
                   
         } elseif(count($this->blues) >= $this->data["slots_blues"]) {
             $this->reds[$player->getName()] = $player;
-            unset($this->blues[$player->getName()] = $player;
+            unset($this->blues[$player->getName()]) = $player;
                   
         } elseif(count($this->greens) >= $this->data["slots_greens"]) {
             $this->reds[$player->getName()] = $player;
-            unset($this->greens[$player->getName()] = $player;             
+            unset($this->greens[$player->getName()]) = $player;             
         }
 
         if($this->inGame($player)) {
