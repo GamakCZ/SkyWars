@@ -582,9 +582,9 @@ class Arena implements Listener {
             "level" => null,
             "slots" => 12,
             "spawns" => [],
-            "slots_reds" = 0,
-            "slots_blues" = 0,
-            "slots_greens" = 0,
+            "slots_reds" => 0,
+            "slots_blues" => 0,
+            "slots_greens" => 0,
             "enabled" => false,
             "joinsign" => []
         ];
