@@ -2,6 +2,6 @@
 branches:
 - master
 projects:
-  SkyWars:
+  SkyWarsTeams:
     path: SkyWars/
 ...
