@@ -85,11 +85,22 @@ class SkyWars extends PluginBase implements Listener {
                 "§7help : Displays list of available setup commands\n" .
                 "§7slots : Updates arena slots\n".
                 "§7level : Sets arena level\n".
+                "§7maxslotsteam : Sets max slots for teams arena level\n".
                 "§7spawn : Sets arena spawns\n".
                 "§7joinsign : Sets arena join sign\n".
                 "§7savelevel : Saves the arena level\n".
                 "§7enable : Enables the arena");
                 break;
+            case "maxslotsteam":
+                if(!isset($args[1])) {
+                    $player->sendMessage("§cUsage: §7maxslotsteam <int>");
+                    break;
+                }
+                $arena->data["slots_reds"] = (int)$args[1];
+                $arena->data["slots_greens"] = (int)$args[1];
+                $arena->data["slots_blues"] = (int)$args[1];
+                $player->sendMessage("§a> Max slots for teams updated to $args[1]!");
+                break;        
             case "slots":
                 if(!isset($args[1])) {
                     $player->sendMessage("§cUsage: §7slots <int: slots>");
