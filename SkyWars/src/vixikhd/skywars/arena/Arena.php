@@ -239,7 +239,7 @@ class Arena implements Listener {
             
         }
 
-
+        
         $this->players = $players;
         $this->phase = 1;
 
@@ -249,16 +249,20 @@ class Arena implements Listener {
     }
 
     public function startRestart() {
-        $player = null;
+        $player = null;    
         foreach ($this->players as $p) {
             $player = $p;
         }
-
+	    
         if($player === null || (!$player instanceof Player) || (!$player->isOnline())) {
             $this->phase = self::PHASE_RESTART;
             return;
         }
-
+	    
+        $this->reds = null;
+	$this->blues = null;
+	$this->greens = null;
+	    
         $player->addTitle("§aYOU WON!");
         $this->plugin->getServer()->getPluginManager()->callEvent(new PlayerArenaWinEvent($this->plugin, $player, $this));
         //$this->plugin->getServer()->broadcastMessage("§a[SkyWars] Player {$player->getName()} won the game at {$this->level->getFolderName()}!");
