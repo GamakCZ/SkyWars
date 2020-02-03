@@ -140,7 +140,7 @@ class Arena implements Listener {
             return;
         }
 	    
-	$this->getTeamRandom($player);
+	$this->getTeamsRandom($player);
         
         if(count($this->reds) >= $this->data["slots_reds"]) {
             $this->blues[$player->getName()] = $player;
