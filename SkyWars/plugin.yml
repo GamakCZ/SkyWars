@@ -1,28 +1,30 @@
-name: SkyWars
+name: SkyWarsTeam
 api: 3.0.0
-version: 1.2.1
+version: 1.0.1_BUILDING
 main: vixikhd\skywars\SkyWars
 author: VixikHD
-description: SkyWars minigame plugin
+dev: DragoVN
+description: SkyWars Team minigame plugin
 website: https://github.com/GamakCZ/SkyWars
+website_skywars_team: https://github.com/hachkingtohach1/SkyWarsTeam
 
 permissions:
   sw.cmd:
-    description: Permission to all SkyWars commands
+    description: Permission to all SkyWars Team commands
     default: op
     children:
       sw.cmd.help:
-        description: Permission for /sw help
+        description: Permission for /swt help
         default: op
       sw.cmd.create:
-        description: Permission for /sw create
+        description: Permission for /swt create
         default: op
       sw.cmd.remove:
-        description: Permission for /sw remove
+        description: Permission for /swt remove
         default: op
       sw.cmd.set:
-        description: Permission for /sw set
+        description: Permission for /swt set
         default: op
       sw.cmd.arenas:
-        description: Permission for /sw arenas
+        description: Permission for /swt arenas
         default: op
