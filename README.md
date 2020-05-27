@@ -185,7 +185,7 @@ sw.cmd:
 - Lucky blocks
 - More setup commands
 
-**You can buy it [here](https://store.vixikhd.gq)**
+**You can buy it [here](https://store.vixik.gq)**
 
 
 
