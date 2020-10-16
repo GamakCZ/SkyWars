@@ -59,16 +59,14 @@ class Arena implements Listener {
 
     /** @var SkyWars $plugin */
     public $plugin;
-
+    
     /** @var ArenaScheduler $scheduler */
     public $scheduler;
-
     /** @var MapReset $mapReset */
     public $mapReset;
 
     /** @var int $phase */
     public $phase = 0;
-
     /** @var array $data */
     public $data = [];
 
@@ -77,7 +75,7 @@ class Arena implements Listener {
 
     /** @var Player[] $players */
     public $players = [];
-
+    
     /** @var Player[] $toRespawn */
     public $toRespawn = [];
 
@@ -144,7 +142,7 @@ class Arena implements Listener {
         $player->setHealth(20);
         $player->setFood(20);
 
-        $this->broadcastMessage("§a> Player {$player->getName()} joined! §7[".count($this->players)."/{$this->data["slots"]}]");
+        $this->broadcastMessage("§a> {$player->getName()} joined the game! §7[".count($this->players)."/{$this->data["slots"]}]");
     }
 
     /**
@@ -184,7 +182,7 @@ class Arena implements Listener {
         $player->teleport($this->plugin->getServer()->getDefaultLevel()->getSpawnLocation());
 
         if(!$death) {
-            $this->broadcastMessage("§a> Player {$player->getName()} left the game. §7[".count($this->players)."/{$this->data["slots"]}]");
+            $this->broadcastMessage("§a> {$player->getName()} left the game. §7[".count($this->players)."/{$this->data["slots"]}]");
         }
 
         if($quitMsg != "") {
@@ -221,7 +219,7 @@ class Arena implements Listener {
 
         $player->addTitle("§aYOU WON!");
         $this->plugin->getServer()->getPluginManager()->callEvent(new PlayerArenaWinEvent($this->plugin, $player, $this));
-        $this->plugin->getServer()->broadcastMessage("§a[SkyWars] Player {$player->getName()} won the game at {$this->level->getFolderName()}!");
+        $this->plugin->getServer()->broadcastMessage("§a[SkyWars] Player {$player->getName()} has won the game at {$this->level->getFolderName()}!");
         $this->phase = self::PHASE_RESTART;
     }
 
@@ -404,7 +402,15 @@ class Arena implements Listener {
         }
         $this->toRespawn[$player->getName()] = $player;
         $this->disconnectPlayer($player, "", true);
-        $this->broadcastMessage("§a> {$this->plugin->getServer()->getLanguage()->translate($event->getDeathMessage())} §7[".count($this->players)."/{$this->data["slots"]}]");
+        
+        $deathMessage = $event->getDeathMessage();
+        if($deathMessage === null) {
+            $this->broadcastMessage("§a> {$player->getName()} died. §7[".count($this->players)."/{$this->data["slots"]}]");
+        }
+        else {
+            $this->broadcastMessage("§a> {$this->plugin->getServer()->getLanguage()->translate($deathMessage)} §7[".count($this->players)."/{$this->data["slots"]}]");   
+        }
+        
         $event->setDeathMessage("");
         $event->setDrops([]);
     }
@@ -436,7 +442,7 @@ class Arena implements Listener {
         $player = $event->getEntity();
         if(!$player instanceof Player) return;
         if($this->inGame($player)) {
-            $this->disconnectPlayer($player, "You have successfully left the game!");
+            $this->disconnectPlayer($player, "You have been disconnected from the game.");
         }
     }
 
