@@ -133,29 +133,16 @@ class SkyWars extends PluginBase implements Listener {
                 break;
             case "savelevel":
                 if(!$arena->level instanceof Level) {
-                    $levelName = $arena->data["level"];
-                    if(!is_string($levelName) || !$this->getServer()->isLevelGenerated($levelName)) {
-                        errorMessage:
-                        $player->sendMessage("§c> Error while saving the level: world not found.");
-                        if($arena->setup) {
-                            $player->sendMessage("§6> Try save level after enabling the arena.");
-                        }
-                        return;
+                    $player->sendMessage("§c> Error while saving the level: world not found.");
+                    if($arena->setup) {
+                       $player->sendMessage("§6> Try save level after enabling the arena.");
+                       return;
                     }
-                    if(!$this->getServer()->isLevelLoaded($levelName)) {
-                        $this->getServer()->loadLevel($levelName);
+                    if(!$arena->mapReset instanceof MapReset) {
+                        $player->sendMessage("§6> Try save level after enabling the arena.");
                     }
-
-                    try {
-                        if(!$arena->mapReset instanceof MapReset) {
-                            goto errorMessage;
-                        }
-                        $arena->mapReset->saveMap($this->getServer()->getLevelByName($levelName));
-                        $player->sendMessage("§a> Level saved!");
-                    }
-                    catch (\Exception $exception) {
-                        goto errorMessage;
-                    }
+                    $arena->mapReset->saveMap($arena->level);
+                    $player->sendMessage("§a> Level saved!");
                     break;
                 }
                 break;
