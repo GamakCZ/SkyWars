@@ -29,6 +29,16 @@ use pocketmine\tile\Sign;
 use vixikhd\skywars\math\Time;
 use vixikhd\skywars\math\Vector3;
 
+use pocketmine\item\Item;
+use pocketmine\tile\Sign;
+use skywars\math\Time;
+use skywars\math\Vector3;
+use pocketmine\Player;
+use pocketmine\inventory\Inventory;
+
+use pocketmine\utils\Config;
+use Scoreboards\Scoreboards;
+
 /**
  * Class ArenaScheduler
  * @package skywars\arena
@@ -39,7 +49,10 @@ class ArenaScheduler extends Task {
     protected $plugin;
 
     /** @var int $startTime */
-    public $startTime = 40;
+    public $startTime = 30;
+    
+    /** @var int $ChestFill */
+    public $refill = 100;
 
     /** @var float|int $gameTime */
     public $gameTime = 20 * 60;
@@ -69,123 +82,275 @@ class ArenaScheduler extends Task {
         switch ($this->plugin->phase) {
             case Arena::PHASE_LOBBY:
                 if(count($this->plugin->players) >= 2) {
-                    $this->plugin->broadcastMessage("§a> Starting in " . Time::calculateTime($this->startTime) . " sec.", Arena::MSG_TIP);
+                        foreach ($this->plugin->players as $player) {
+
+    $api = Scoreboards::getInstance();
+   
+    $api->new($player, "ObjectiveName", "§l§eSKYWARS");
+    
+    $api->setLine($player, 1, T::GRAY." ".date("d/m/Y").T::BLACK." ");
+    
+    $api->setLine($player, 2, "  ");
+          
+    $api->setLine($player, 3, "§f§7: §a Solo");
+                
+    $api->setLine($player, 4, "§fa§7: §a ". $this->plugin->level->getFolderName());
+    
+    $api->setLine($player, 5, "   ");
+
+                $api->setLine($player, 6, "§f Starting in§7: §a " . Time::calculateTime($this->startTime) . str_repeat(" ", 3));
+                
+                $api->setLine($player, 7, "          ");
+                
+                    $api->setLine($player, 8, "§f§7: §a /12 " . count($this->plugin->players));
+    
+                $api->setLine($player, 9, "          ");
+
+                $api->setLine($player, 10, "§eurservername.com");
+                $api->getObjectiveName($player);
+                    
+					$this->plugin->broadcastMessage("§eStarting in §c" . Time::calculateTime($this->startTime) . "", Arena::MSG_TIP);
+					if($this->startTime == 10){
+					$this->plugin->broadcastMessage("§l§eSKY§aWARS\n§r§cSolo§f Mode", Arena::MSG_TITLE);
+					$this->plugin->broadcastMessage("§eThe game will started in §610§e seconds");
+					}
+					if($this->startTime == 5){
+					$this->plugin->broadcastMessage("§l§c5\n§r§ePrepare to fight", Arena::MSG_TITLE);
+					$this->plugin->broadcastMessage("§eThe game will started in §c5§e seconds");
+					}
+					if($this->startTime == 4){
+					$this->plugin->broadcastMessage("§l§c4\n§r§ePrepare to fight", Arena::MSG_TITLE);
+					$this->plugin->broadcastMessage("§eThe game will started in §c4§e seconds");
+					}
+					if($this->startTime == 3){
+					$this->plugin->broadcastMessage("§l§c3\n§r§ePrepare to fight", Arena::MSG_TITLE);
+					$this->plugin->broadcastMessage("§eThe game will started in §c3§e seconds");
+					}
+					if($this->startTime == 2){
+					$this->plugin->broadcastMessage("§l§c2\n§r§ePrepare to fight", Arena::MSG_TITLE);
+					$this->plugin->broadcastMessage("§eThe game will started in §c2§e seconds");
+					}
+					if($this->startTime == 1){
+					$this->plugin->broadcastMessage("§l§c1\n§r§ePrepare to fight", Arena::MSG_TITLE);
+					$this->plugin->broadcastMessage("§eThe game will started in §c1§e seconds");
+					}
                     $this->startTime--;
-                    if($this->startTime == 0) {
+                    if($this->startTime == 0){
                         $this->plugin->startGame();
                         foreach ($this->plugin->players as $player) {
                             $this->plugin->level->addSound(new AnvilUseSound($player->asVector3()));
+						//	$player->getInventory()->removeItem(Item::get(261, 0, 1));
                         }
                     }
-                    else {
+                 }
+             }else{
                         foreach ($this->plugin->players as $player) {
                             $this->plugin->level->addSound(new ClickSound($player->asVector3()));
                         }
-                    }
+                    $this->startTime = 30;
+                        foreach ($this->plugin->players as $player) {
+
+    $api = Scoreboards::getInstance();
+   
+    $api->new($player, "ObjectiveName", "§l§eSKY§aWARS");
+    
+    $api->setLine($player, 1, T::GRAY." ".date("d/m/Y").T::BLACK." ");
+    
+                $api->getObjectiveName($player);
                 }
-                else {
-                    $this->plugin->broadcastMessage("§c> You need more players to start a game!", Arena::MSG_TIP);
-                    $this->startTime = 40;
                 }
                 break;
             case Arena::PHASE_GAME:
-                $this->plugin->broadcastMessage("§a> There are " . count($this->plugin->players) . " players, time to end: " . Time::calculateTime($this->gameTime) . "", Arena::MSG_TIP);
+                        foreach ($this->plugin->players as $player) {
+
+			    $t = str_repeat(" ", 65);
+			    $kills = new Config("plugin_data/SkyWars/kills.yml", Config::YAML);
+               $kills->getAll();
+			    
+			    $api = Scoreboards::getInstance();
+			    $api->new($player, "ObjectiveName", "§l§eSKY§aWARS");
+    
+                $api->setLine($player, 1, T::GRAY." ".date("d/m/Y").T::BLACK." ");
+    
+                $api->setLine($player, 2, " ");
+          
+                $api->setLine($player, 3, "§f Chest Refill: §a " . Time::calculateTime($this->refill) . str_repeat(" ", 3));
+    
+                $api->setLine($player, 4, "          ");
+
+                $api->setLine($player, 5, "§f§7: §a " . count($this->plugin->players) . str_repeat(" ", 3));
+                
+                $api->setLine($player, 6, "             ");
+                
+                $api->setLine($player, 7, "§f§7: §a " . $kills->get($player->getName(), 0) . str_repeat(" ", 3));
+                
+                $api->setLine($player, 8, "   ");
+                      
+                $api->setLine($player, 9, "§f Game Ends In: §a" . Time::calculateTime($this->gameTime) . str_repeat(" ", 3));
+                
+                $api->setLine($player, 10, "§f§7: §a ". $this->plugin->level->getFolderName());
+    
+                $api->setLine($player, 11, "§f§7: §aNormal");
+    
+                $api->setLine($player, 12, "              ");
+
+                $api->setLine($player, 13, "§eurservername.com");
+                $api->getObjectiveName($player);
+			    
                 switch ($this->gameTime) {
                     case 15 * 60:
-                        $this->plugin->broadcastMessage("§a> All chests will be refilled in 5 min.");
+                        $this->plugin->broadcastMessage("§l§eSKY§aWARS§8 >§r §eAll chest will be refill in 5 minutes!");
                         break;
                     case 11 * 60:
-                        $this->plugin->broadcastMessage("§a> All chest will be refilled in 1 min.");
+                        $this->plugin->broadcastMessage("§l§eSKY§aWARS§8 >§r §eAll chest will be refill in 1 minute!");
                         break;
                     case 10 * 60:
-                        $this->plugin->broadcastMessage("§a> All chests are refilled.");
+                        $this->plugin->broadcastMessage("§l§eSKY§aWARS§8 >§r §eAll chest has been refilled!");
                         break;
+                    case 9 * 60:
+                        $this->plugin->broadcastMessage("§l§eSKY§aWARS§8 >§r §eEnder dragon spawning in 2 minutes!");
+                        break;
+                    case 8 * 60:
+                        $this->plugin->broadcastMessage("§l§eSKY§aWARS§8 >§r §eThe End dragon has been spawned!");
+
+                        break;
+
                 }
+         }
                 if($this->plugin->checkEnd()) $this->plugin->startRestart();
                 $this->gameTime--;
                 break;
             case Arena::PHASE_RESTART:
-                $this->plugin->broadcastMessage("§a> Restarting in {$this->restartTime} sec.", Arena::MSG_TIP);
+                $this->plugin->broadcastMessage("§eTeleporting to lobby in §c{$this->restartTime}§e seconds", Arena::MSG_TIP);
                 $this->restartTime--;
 
                 switch ($this->restartTime) {
                     case 0:
+        foreach ($this->plugin->players as $player) {
+                            
+        $player->teleport($this->plugin->plugin->getServer()->getDefaultLevel()->getSpawnLocation());
+        $player->getInventory()->clearAll();
+        $player->getArmorInventory()->clearAll();
+        $player->getCursorInventory()->clearAll();
+        $player->setFood(20);
+        $player->setHealth(20);
+        $player->setGamemode($this->plugin->plugin->getServer()->getDefaultGamemode());
+             //CLEARS KILLS
+             $bkconfig = new Config("plugin_data/SkyWars/kills.yml", Config::YAML);
+             $bkconfig->set($player->getName(), $bkconfig->remove($player->getName(), "               "));
+             $bkconfig->set($player->getName(), $bkconfig->remove($player->getName(), "0"));
+             $bkconfig->getAll();
 
-                        foreach ($this->plugin->players as $player) {
-                            $player->teleport($this->plugin->plugin->getServer()->getDefaultLevel()->getSpawnLocation());
-
-                            $player->getInventory()->clearAll();
-                            $player->getArmorInventory()->clearAll();
-                            $player->getCursorInventory()->clearAll();
-
-                            $player->setFood(20);
-                            $player->setHealth(20);
-
-                            $player->setGamemode($this->plugin->plugin->getServer()->getDefaultGamemode());
                         }
-                        $this->plugin->loadArena(true);
-                        $this->reloadTimer();
+                $this->plugin->loadArena(true);
+                  $this->reloadTimer();
                         break;
                 }
                 break;
         }
     }
+    
+    /**
+     * @param PlayerQuitEvent $event
+     */
+    public function onQuit(PlayerQuitEvent $event) : void{
+        $player = $event->getPlayer();
+        $player->teleport($this->plugin->plugin->getServer()->getDefaultLevel()->getSpawnLocation());
+        $player->getInventory()->clearAll();
+        $player->getArmorInventory()->clearAll();
+        $player->getCursorInventory()->clearAll();
+        $player->setFood(20);
+        $player->setHealth(20);
+        $player->setGamemode($this->plugin->plugin->getServer()->getDefaultGamemode());
+        //CLEARS KILLS
+        $bkconfig = new Config("plugin_data/SkyWars/kills.yml", Config::YAML);
+        $bkconfig->set($player->getName(), $bkconfig->remove($player->getName(), "               "));
+        $bkconfig->set($player->getName(), $bkconfig->remove($player->getName(), "0"));
+        $bkconfig->getAll();
+
+    }
+    
+  /**
+   * @param PlayerDeathEvent $event
+   */
+   
+   public function onPlayerDeath(PlayerDeathEvent $event){
+    $victim = $event->getEntity();
+    
+    if($victim->getLastDamageCause() instanceof EntityDamageByEntityEvent){
+    if($victim->getLastDamageCause()->getDamager() instanceof Player){
+      $killer = $victim->getLastDamageCause()->getDamager();
+
+      SoulsAPI::getInstance()->addSouls($killer, 3);
+      $killer->sendMessage("§l§a+§r§b3§e souls");
+       $victim->setHealth(20);
+        $victim->setFood(20);
+		$victim->setGamemode(3);
+		$victim->setFlying(true);
+
+      $tklconfig = new Config("plugin_data/SkyWars/kills.yml", Config::YAML);
+		$tklconfig->set($player->getName(), $tklconfig->get($player->getName()) + 1);
+     $tklconfig->set($killer->getName(), $tklconfig->get($killer->getName()) + 1);
+      $tklconfig->save();
+         }
+     }
+}
 
     public function reloadSign() {
         if(!is_array($this->plugin->data["joinsign"]) || empty($this->plugin->data["joinsign"])) return;
 
         $signPos = Position::fromObject(Vector3::fromString($this->plugin->data["joinsign"][0]), $this->plugin->plugin->getServer()->getLevelByName($this->plugin->data["joinsign"][1]));
 
-        if(!$signPos->getLevel() instanceof Level || is_null($this->plugin->level)) return;
+        if(!$signPos->getLevel() instanceof Level) return;
 
         $signText = [
-            "§e§lSkyWars",
-            "§9[ §b? / ? §9]",
-            "§6Setup",
-            "§6Wait few sec..."
+            "§l§eSKY§aWARS",
+            "§8[ §f?§7 /§a ? §8]",
+            "§cResetting Arena",
+            "§eWait few seconds..."
         ];
 
         if($signPos->getLevel()->getTile($signPos) === null) return;
 
-        if($this->plugin->setup || $this->plugin->level === null) {
+        if($this->plugin->setup) {
             /** @var Sign $sign */
             $sign = $signPos->getLevel()->getTile($signPos);
             $sign->setText($signText[0], $signText[1], $signText[2], $signText[3]);
             return;
         }
 
-        $signText[1] = "§9[ §b" . count($this->plugin->players) . " / " . $this->plugin->data["slots"] . " §9]";
+        $signText[1] = "§f" . count($this->plugin->players) . " §7/ " . $this->plugin->data["slots"] . "";
 
         switch ($this->plugin->phase) {
             case Arena::PHASE_LOBBY:
                 if(count($this->plugin->players) >= $this->plugin->data["slots"]) {
-                    $signText[2] = "§6Full";
-                    $signText[3] = "§8Map: §7{$this->plugin->level->getFolderName()}";
+                    $signText[2] = "§c§lFull ";
+                    $signText[3] = "§fMap§7: §e{$this->plugin->level->getFolderName()}";
                 }
                 else {
-                    $signText[2] = "§aJoin";
-                    $signText[3] = "§8Map: §7{$this->plugin->level->getFolderName()}";
+                    $signText[2] = "§ajoinable";
+                    $signText[3] = "§fMap§7: §e{$this->plugin->level->getFolderName()}";
                 }
                 break;
             case Arena::PHASE_GAME:
-                $signText[2] = "§5InGame";
-                $signText[3] = "§8Map: §7{$this->plugin->level->getFolderName()}";
+                $signText[2] = "§c§lGame-running";
+                $signText[3] = "§fMap§7: §e{$this->plugin->level->getFolderName()}";
                 break;
             case Arena::PHASE_RESTART:
-                $signText[2] = "§cRestarting...";
-                $signText[3] = "§8Map: §7{$this->plugin->level->getFolderName()}";
+                $signText[2] = "§c§lResetting arena§r§e...";
+                $signText[3] = "§fMap§7: §a{$this->plugin->level->getFolderName()}";
                 break;
         }
 
         /** @var Sign $sign */
         $sign = $signPos->getLevel()->getTile($signPos);
-        if($sign instanceof Sign) // Chest->setText() doesn't work :D
-            $sign->setText($signText[0], $signText[1], $signText[2], $signText[3]);
+        $sign->setText($signText[0], $signText[1], $signText[2], $signText[3]);
     }
 
     public function reloadTimer() {
         $this->startTime = 30;
         $this->gameTime = 20 * 60;
         $this->restartTime = 10;
+        $this->refill = 100;
     }
 }
