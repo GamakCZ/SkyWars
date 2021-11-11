@@ -24,23 +24,42 @@ use pocketmine\block\Block;
 use pocketmine\entity\Attribute;
 use pocketmine\event\entity\EntityLevelChangeEvent;
 use pocketmine\event\Listener;
+
 use pocketmine\event\player\PlayerDeathEvent;
-use pocketmine\event\player\PlayerExhaustEvent;
 use pocketmine\event\player\PlayerInteractEvent;
+use pocketmine\event\entity\EntityDamageEvent;
+use pocketmine\event\entity\EntityDamageByEntityEvent;
+use pocketmine\event\entity\ProjectileHitEvent;
 use pocketmine\event\player\PlayerMoveEvent;
 use pocketmine\event\player\PlayerQuitEvent;
 use pocketmine\event\player\PlayerRespawnEvent;
+
+use pocketmine\command\CommandExecutor;
+use pocketmine\command\ConsoleCommandSender;
 use pocketmine\inventory\ChestInventory;
+
+use pocketmine\network\mcpe\protocol\ChangeDimensionPacket;
+use pocketmine\network\mcpe\protocol\PlayStatusPacket;
+
 use pocketmine\item\Item;
 use pocketmine\level\Level;
 use pocketmine\level\Position;
+
+use pocketmine\item\enchantment\Enchantment;
+use pocketmine\item\enchantment\EnchantmentInstance;
 use pocketmine\network\mcpe\protocol\AdventureSettingsPacket;
 use pocketmine\Player;
 use pocketmine\tile\Chest;
 use pocketmine\tile\Tile;
-use vixikhd\skywars\event\PlayerArenaWinEvent;
-use vixikhd\skywars\math\Vector3;
-use vixikhd\skywars\SkyWars;
+use skywars\event\PlayerArenaWinEvent;
+use skywars\math\Vector3;
+use skywars\SkyWars;
+
+use onebone\economyapi\EconomyAPI;
+use AMGM\TOP;
+
+use pocketmine\Server;
+use pocketmine\inventory\Inventory;
 
 /**
  * Class Arena
@@ -52,34 +71,23 @@ class Arena implements Listener {
     const MSG_TIP = 1;
     const MSG_POPUP = 2;
     const MSG_TITLE = 3;
-
+    
     const PHASE_LOBBY = 0;
     const PHASE_GAME = 1;
     const PHASE_RESTART = 2;
 
-    /** @var SkyWars $plugin */
+
     public $plugin;
     
-    /** @var ArenaScheduler $scheduler */
     public $scheduler;
-    /** @var MapReset $mapReset */
     public $mapReset;
-
-    /** @var int $phase */
     public $phase = 0;
-    /** @var array $data */
+    
     public $data = [];
-
-    /** @var bool $setting */
     public $setup = false;
 
-    /** @var Player[] $players */
     public $players = [];
-    
-    /** @var Player[] $toRespawn */
     public $toRespawn = [];
-
-    /** @var Level $level */
     public $level = null;
 
     /**
@@ -107,19 +115,20 @@ class Arena implements Listener {
     /**
      * @param Player $player
      */
-    public function joinToArena(Player $player) {
+    public function joinToArena(Player $event) {
+		$player = $event->getPlayer();
         if(!$this->data["enabled"]) {
-            $player->sendMessage("§c> Arena is under setup!");
+            $player->sendMessage("§l§cPlease try again later!");
             return;
         }
 
         if(count($this->players) >= $this->data["slots"]) {
-            $player->sendMessage("§c> Arena is full!");
+            $player->sendMessage("§cMap is §lFULL§r§c! Please try another map!");
             return;
         }
 
         if($this->inGame($player)) {
-            $player->sendMessage("§c> You are already in game!");
+            $player->sendMessage("§cYou Are already in a game!");
             return;
         }
 
@@ -137,20 +146,24 @@ class Arena implements Listener {
         $player->getInventory()->clearAll();
         $player->getArmorInventory()->clearAll();
         $player->getCursorInventory()->clearAll();
-
         $player->setGamemode($player::ADVENTURE);
         $player->setHealth(20);
         $player->setFood(20);
-
-        $this->broadcastMessage("§a> {$player->getName()} joined the game! §7[".count($this->players)."/{$this->data["slots"]}]");
-    }
+		$player->setAllowFlight(false);
+		$player->setFlying(false);
+		$player = $event->getPlayer();
+		$name = $player->getName();
+		$this->broadcastMessage("§r§f{$name}§e joined the match §e(§b".count($this->players)."/{$this->data["slots"]}§e)");
+		$player->getInventory()->setItem(0, Item::get(261, 0, 1)->setCustomName("§eKits §7(§fTap to use§7)"));
+		$player->getInventory()->setItem(8, Item::get(355, 14, 1)->setCustomName("§cBack To Hub §5(§fTap to use§5)"));
+	}
 
     /**
      * @param Player $player
      * @param string $quitMsg
      * @param bool $death
      */
-    public function disconnectPlayer(Player $player, string $quitMsg = "", bool $death = false) {
+    public function disconnectPlayer(Player $player, string $quitMsg = "", bool $death = \false) {
         switch ($this->phase) {
             case Arena::PHASE_LOBBY:
                 $index = "";
@@ -167,26 +180,12 @@ class Arena implements Listener {
                 unset($this->players[$player->getName()]);
                 break;
         }
-
-        $player->removeAllEffects();
-
-        $player->setGamemode($this->plugin->getServer()->getDefaultGamemode());
-
-        $player->setHealth(20);
-        $player->setFood(20);
-
-        $player->getInventory()->clearAll();
-        $player->getArmorInventory()->clearAll();
-        $player->getCursorInventory()->clearAll();
-
-        $player->teleport($this->plugin->getServer()->getDefaultLevel()->getSpawnLocation());
-
         if(!$death) {
-            $this->broadcastMessage("§a> {$player->getName()} left the game. §7[".count($this->players)."/{$this->data["slots"]}]");
+            $this->broadcastMessage("§f{$player->getName()}§e left the match §e(§b".count($this->players)."/{$this->data["slots"]}§e)");
         }
 
         if($quitMsg != "") {
-            $player->sendMessage("§a> $quitMsg");
+            $player->sendMessage("$quitMsg");
         }
     }
 
@@ -202,9 +201,17 @@ class Arena implements Listener {
         $this->phase = 1;
 
         $this->fillChests();
+     
+        $this->broadcastMessage("§l§cSTART", self::MSG_TITLE);
+		$this->broadcastMessage("§eGame started!");
+		$this->broadcastMessage("§l§a=============================");
+		$this->broadcastMessage("                    §l§fSKYWARS         ");
+		$this->broadcastMessage("§eThe game has started! Be the last player to win! There are also goodies in the middle, try to get there fast!");
+        $this->broadcastMessage("§cThis is Not DctxGames Map, We Currently Dont Have Builders...");
+        $this->broadcastMessage("§cSo");
+		$this->broadcastMessage("§l§a=============================");
 
-        $this->broadcastMessage("Game Started!", self::MSG_TITLE);
-    }
+	}
 
     public function startRestart() {
         $player = null;
@@ -216,10 +223,21 @@ class Arena implements Listener {
             $this->phase = self::PHASE_RESTART;
             return;
         }
-
-        $player->addTitle("§aYOU WON!");
+        $player->addTitle("§l§6VICTORY!", "§7You were the last man standing!");
+		$player->sendMessage("§a=====================================");
+		$player->sendMessage("\n");
+		$player->sendMessage("                   §l§eSKY§aWARS§r!                    ");
+		$player->sendMessage("§eEarned §610§b Coins§e for Winning");
+		$player->sendMessage("§eEarned §610§b Coins§e for Playing");
+		$player->sendMessage("\n");
+		$player->sendMessage("§a=====================================");
+		$player->sendMessage("§6+10 Coins Total");
         $this->plugin->getServer()->getPluginManager()->callEvent(new PlayerArenaWinEvent($this->plugin, $player, $this));
-        $this->plugin->getServer()->broadcastMessage("§a[SkyWars] Player {$player->getName()} has won the game at {$this->level->getFolderName()}!");
+        $this->plugin->getServer()->broadcastMessage("§l§eSKY§aWARS §f{$player->getName()}§b won the skywars match on arena §b{$this->level->getFolderName()}!");
+		$player->getInventory()->clearAll();
+		$player->getArmorInventory()->clearAll();
+        $player->getCursorInventory()->clearAll();
+		EconomyAPI::getInstance()->addMoney($player, 100);
         $this->phase = self::PHASE_RESTART;
     }
 
@@ -277,30 +295,158 @@ class Arena implements Listener {
 
         $fillInv = function (ChestInventory $inv) {
             $fillSlot = function (ChestInventory $inv, int $slot) {
-                $id = self::getChestItems()[$index = rand(0, 4)][rand(0, (int)(count(self::getChestItems()[$index])-1))];
+                $id = self::getChestItems()[$index = rand(0, 5)][rand(0, (int)(count(self::getChestItems()[$index])-1))];
                 switch ($index) {
                     case 0:
                         $count = 1;
                         break;
                     case 1:
-                        $count = 1;
+                        $count = rand(16, 32);
                         break;
                     case 2:
-                        $count = rand(5, 64);
+                        $count = 1;
                         break;
                     case 3:
-                        $count = rand(5, 64);
+                        $count = 1;
                         break;
                     case 4:
-                        $count = rand(1, 5);
+                        $count = rand(8, 16);
                         break;
+				    case 5:
+					    $count = 1;
+						break;
                     default:
                         $count = 0;
                         break;
                 }
+                $ec = mt_rand(1, 60);
+                switch($ec){
+               case 1:
+			   $ec = Item::get(1, 0, 16);
+			   break;
+			   case 3:
+			   $ec = Item::get(4, 0, 16);
+			   break;
+			   case 5:
+			   $ec = Item::get(5, 0, 16);
+			   break;
+			   case 7:
+			   $ec = Item::get(275, 0, 1);
+			   break;
+			   case 9:
+			   $ec = Item::get(274, 0, 1);
+			   break;
+			   case 11:
+			   $ec = Item::get(306, 0, 1);
+			   break;
+			   case 13:
+			   $ec = Item::get(307, 0, 1);
+			   break;
+			   case 14:
+			   $ec = Item::get(308, 0, 1);
+			   $ec1 = Enchantment::getEnchantment(0);
+			   $ec1a = new EnchantmentInstance($ec1, 1);
+			   $ec->addEnchantment($ec1a);
+			   break;
+			   case 16:
+			   $ec = Item::get(308, 0, 1);
+               break;
+			   case 18:
+			   $ec = Item::get(276, 0, 1);
+			   break;
+			   case 20:
+			   $ec = Item::get(276, 0, 1);
+			   $ec1 = Enchantment::getEnchantment(9);
+			   $ec1a = new EnchantmentInstance($ec1, 1);
+			   break;
+			   case 22:
+			   $ec = Item::get(261, 0, 1);
+			   break;
+			   case 23:
+			   $ec = Item::get(262, 0, 16);
+			   break;
+			   case 25:
+			   $ec = Item::get(279, 0, 1);
+			   break;
+			   case 27:
+			   $ec = Item::get(278, 0, 1);
+			   break;
+			   case 29:
+			   $ec = Item::get(332, 0, 16);
+			   break;
+			   case 31:
+			   $ec = Item::get(344, 0, 16);
+			   break;
+			   case 35:
+			   $ec = Item::get(276, 0, 1);
+			   $ec1 = Enchantment::getEnchantment(9);
+			   $ec1a = new EnchantmentInstance($ec1, 3);
+			   break;
+			   case 37:
+			   $ec = Item::get(310, 0, 1);
+			   $ec1 = Enchantment::getEnchantment(0);
+			   $ec1a = new EnchantmentInstance($ec1, 3);
+			   $ec->addEnchantment($ec1a);
+			   break;
+			   case 39:
+			   $ec = Item::get(311, 0, 1);
+			   $ec1 = Enchantment::getEnchantment(0);
+			   $ec1a = new EnchantmentInstance($ec1, 3);
+			   $ec->addEnchantment($ec1a);
+			   break;
+			   case 41:
+			   $ec = Item::get(312, 0, 1);
+			   $ec1 = Enchantment::getEnchantment(0);
+			   $ec1a = new EnchantmentInstance($ec1, 3);
+			   $ec->addEnchantment($ec1a);
+			   break;
+			   case 44:
+			   $ec = Item::get(313, 0, 1);
+			   $ec1 = Enchantment::getEnchantment(0);
+			   $ec1a = new EnchantmentInstance($ec1, 3);
+			   $ec->addEnchantment($ec1a);
+			   break;
+			   case 46:
+			   $ec = Item::get(373, 8226, 1);
+			   break;
+			   case 48:
+			   $ec = Item::get(373, 30, 1);
+			   break;
+			   case 50:
+			   $ec = Item::get(368, 0, 1);
+			   break;
+			   case 52:
+			   $ec = Item::get(322, 0, 1);
+			   break;
+			   case 53:
+			   $ec = Item::get(10, 0, 1);
+			   break;
+               case 54:
+               $ec = Item::get(5, 0, 64);
+               break;
+               case 55:
+               $ec = Item::get(5, 0, 64);
+               break;
+               case 56:
+               $ec = Item::get(1, 0, 64);
+               break;
+               case 57:
+               $ec = Item::get(1, 0, 64);
+               break;
+               case 58:
+               $ec = Item::get(17, 0, 64);
+               break;
+               case 59:
+               $ec = Item::get(4, 0, 64);
+               break;
+			   
+			   default:
+               $ec = Item::get(0, 0, 0);
+                        break;
+                }  
                 $inv->setItem($slot, Item::get($id, 0, $count));
+                $inv->setItem($slot, $ec);
             };
-
             $inv->clearAll();
 
             for($x = 0; $x <= 26; $x++) {
@@ -332,25 +478,11 @@ class Arena implements Listener {
                 }
             }
             if($event->getPlayer()->asVector3()->distance(Vector3::fromString($this->data["spawns"][$index])) > 1) {
-                // $event->setCancelled() wont work
+                // $event->setCancelled() will not work
                 $player->teleport(Vector3::fromString($this->data["spawns"][$index]));
             }
         }
     }
-
-    /**
-     * @param PlayerExhaustEvent $event
-     */
-    public function onExhaust(PlayerExhaustEvent $event) {
-        $player = $event->getPlayer();
-
-        if(!$player instanceof Player) return;
-
-        if($this->inGame($player) && $this->phase == self::PHASE_LOBBY) {
-            $event->setCancelled(true);
-        }
-    }
-
     /**
      * @param PlayerInteractEvent $event
      */
@@ -359,7 +491,7 @@ class Arena implements Listener {
         $block = $event->getBlock();
 
         if($this->inGame($player) && $event->getBlock()->getId() == Block::CHEST && $this->phase == self::PHASE_LOBBY) {
-            $event->setCancelled(true);
+            $event->setCancelled(\true);
             return;
         }
 
@@ -374,11 +506,11 @@ class Arena implements Listener {
         }
 
         if($this->phase == self::PHASE_GAME) {
-            $player->sendMessage("§c> Arena is in-game");
+            $player->sendMessage("§cArena is in-game");
             return;
         }
         if($this->phase == self::PHASE_RESTART) {
-            $player->sendMessage("§c> Arena is restarting!");
+            $player->sendMessage("§cArena is reseting!");
             return;
         }
 
@@ -388,49 +520,50 @@ class Arena implements Listener {
 
         $this->joinToArena($player);
     }
-
     /**
      * @param PlayerDeathEvent $event
      */
     public function onDeath(PlayerDeathEvent $event) {
         $player = $event->getPlayer();
-
         if(!$this->inGame($player)) return;
-
         foreach ($event->getDrops() as $item) {
             $player->getLevel()->dropItem($player, $item);
         }
-        $this->toRespawn[$player->getName()] = $player;
-        $this->disconnectPlayer($player, "", true);
-        
-        $deathMessage = $event->getDeathMessage();
-        if($deathMessage === null) {
-            $this->broadcastMessage("§a> {$player->getName()} died. §7[".count($this->players)."/{$this->data["slots"]}]");
-        }
-        else {
-            $this->broadcastMessage("§a> {$this->plugin->getServer()->getLanguage()->translate($deathMessage)} §7[".count($this->players)."/{$this->data["slots"]}]");   
-        }
-        
-        $event->setDeathMessage("");
-        $event->setDrops([]);
-    }
+		$this->disconnectPlayer($player, "", true);
+		$player->setHealth(20);
+        $player->setFood(20);
+		$player->setGamemode(3);
+		$player->setFlying(true);
 
-    /**
-     * @param PlayerRespawnEvent $event
-     */
-    public function onRespawn(PlayerRespawnEvent $event) {
-        $player = $event->getPlayer();
-        if(isset($this->toRespawn[$player->getName()])) {
-            $event->setRespawnPosition($this->plugin->getServer()->getDefaultLevel()->getSpawnLocation());
-            unset($this->toRespawn[$player->getName()]);
-        }
+        $player->sendMessage(count($this->players). "/{$this->data["slots"]})");
+        $player->addTitle("§l§cYOU DIED!");
+		$event->setDrops([]);
     }
+    
+	public function onHit(ProjectileHitEvent $event) {
+		$projectile = $event->getEntity();
+		if($projectile->isAlive() and $projectile instanceof Arrow) {
+			$shooter = $projectile->shootingEntity;
+			if($shooter instanceof Player) {
+                           if ($shooter->getDirection() == 0) {
+                               $projectile->knockBack($projectile, 0, 0.1, 0.1, 0);
+                           } elseif ($shooter->getDirection() == 1) {
+                               $projectile->knockBack($projectile, 0, 0.1, 0.1, 0);
+                           } elseif ($shooter->getDirection() == 2) {
+                               $projectile->knockBack($projectile, 0, -0.1, 0.1, 0);
+                           } elseif ($shooter->getDirection() == 3) {
+                               $projectile->knockBack($projectile, 0, 0.1, -0.1, 0);
+                           }
+                       }
+                   }
+                }
 
     /**
      * @param PlayerQuitEvent $event
      */
     public function onQuit(PlayerQuitEvent $event) {
-        if($this->inGame($event->getPlayer())) {
+        $player = $event->getPlayer();
+		if($this->inGame($event->getPlayer())) {
             $this->disconnectPlayer($event->getPlayer());
         }
     }
@@ -442,8 +575,7 @@ class Arena implements Listener {
         $player = $event->getEntity();
         if(!$player instanceof Player) return;
         if($this->inGame($player)) {
-            $this->disconnectPlayer($player, "You have been disconnected from the game.");
-        }
+			}
     }
 
     /**
@@ -461,6 +593,12 @@ class Arena implements Listener {
 
         if(!$restart) {
             $this->plugin->getServer()->getPluginManager()->registerEvents($this, $this->plugin);
+
+            if(!$this->plugin->getServer()->isLevelLoaded($this->data["level"])) {
+                $this->plugin->getServer()->loadLevel($this->data["level"]);
+            }
+
+            $this->mapReset->saveMap($this->level = $this->plugin->getServer()->getLevelByName($this->data["level"]));
         }
 
 
@@ -470,16 +608,7 @@ class Arena implements Listener {
             $this->level = $this->mapReset->loadMap($this->data["level"]);
         }
 
-        if(!$this->level instanceof Level) {
-            $level = $this->mapReset->loadMap($this->data["level"]);
-            if(!$level instanceof Level) {
-                $this->plugin->getLogger()->error("Arena level wasn't found. Try save level in setup mode.");
-                $this->setup = true;
-                return;
-            }
-            $this->level = $level;
-        }
-
+        if(!$this->level instanceof Level) $this->level = $this->mapReset->loadMap($this->data["level"]);
 
         $this->phase = static::PHASE_LOBBY;
         $this->players = [];
@@ -536,20 +665,23 @@ class Arena implements Listener {
     public static function getChestItems(): array {
         $chestItems = [];
         $chestItems[0] = [
-            256, 257, 258, 267, 268, 269, 270, 271, 272, 273, 274, 275, 276, 277, 278, 279
+            268, 298, 299, 300, 301, 259, 275, 274
         ];
         $chestItems[1] = [
-            298, 299, 300, 301, 302, 303, 304, 305, 306, 307, 308, 309, 310, 311, 312, 313, 314, 315, 316, 317
+            1, 4, 46, 364, 3
         ];
         $chestItems[2] = [
-            319, 320, 297, 391, 392, 393, 396, 400, 411, 412, 423, 424
+            258, 306, 307, 308, 309
         ];
         $chestItems[3] = [
-            1, 2, 3, 4, 5, 12, 13, 14, 15, 16, 17, 18, 82, 35, 45
+            265, 264, 327, 326, 261, 276
         ];
         $chestItems[4] = [
-            263, 264, 265, 266, 280, 297, 322
+            262
         ];
+		$chestItems[5] = [
+		    311, 313
+	    ];
         return $chestItems;
     }
 
