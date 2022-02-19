@@ -20,7 +20,8 @@ declare(strict_types=1);
 
 namespace vixikhd\skywars\provider;
 
-use pocketmine\level\Level;
+use pocketmine\player\Player;
+use pocketmine\world\World;
 use pocketmine\utils\Config;
 use vixikhd\skywars\arena\Arena;
 use vixikhd\skywars\SkyWars;
@@ -65,9 +66,11 @@ class YamlDataProvider {
 
     public function saveArenas() {
         foreach ($this->plugin->arenas as $fileName => $arena) {
-            if($arena->level instanceof Level) {
+            if($arena->level instanceof World) {
                 foreach ($arena->players as $player) {
-                    $player->teleport($player->getServer()->getDefaultLevel()->getSpawnLocation());
+                    if ($player instanceof Player) {
+                        $player->teleport($player->getServer()->getWorldManager()->getDefaultWorld()->getSpawnLocation());
+                    }
                 }
                 // must be reseted
                 $arena->mapReset->loadMap($arena->level->getFolderName(), true);

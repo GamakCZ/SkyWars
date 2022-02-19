@@ -21,8 +21,9 @@ declare(strict_types=1);
 namespace vixikhd\skywars\arena;
 
 use pocketmine\block\Block;
-use pocketmine\entity\Attribute;
-use pocketmine\event\entity\EntityLevelChangeEvent;
+use pocketmine\block\BlockLegacyIds;
+use pocketmine\block\tile\Tile;
+use pocketmine\event\entity\EntityTeleportEvent;
 use pocketmine\event\Listener;
 use pocketmine\event\player\PlayerDeathEvent;
 use pocketmine\event\player\PlayerExhaustEvent;
@@ -30,15 +31,12 @@ use pocketmine\event\player\PlayerInteractEvent;
 use pocketmine\event\player\PlayerMoveEvent;
 use pocketmine\event\player\PlayerQuitEvent;
 use pocketmine\event\player\PlayerRespawnEvent;
-use pocketmine\inventory\ChestInventory;
+use pocketmine\block\inventory\ChestInventory;
 use pocketmine\item\Item;
-use pocketmine\level\Level;
-use pocketmine\level\Position;
-use pocketmine\network\mcpe\protocol\AdventureSettingsPacket;
-use pocketmine\Player;
-use pocketmine\tile\Chest;
-use pocketmine\tile\Tile;
-use vixikhd\skywars\event\PlayerArenaWinEvent;
+use pocketmine\item\ItemFactory;use pocketmine\player\GameMode;use pocketmine\world\Position;
+use pocketmine\player\Player;
+use pocketmine\block\tile\Chest;
+use pocketmine\world\World;use vixikhd\skywars\event\PlayerArenaWinEvent;
 use vixikhd\skywars\math\Vector3;
 use vixikhd\skywars\SkyWars;
 
@@ -79,7 +77,7 @@ class Arena implements Listener {
     /** @var Player[] $toRespawn */
     public $toRespawn = [];
 
-    /** @var Level $level */
+    /** @var World $level */
     public $level = null;
 
     /**
@@ -138,9 +136,9 @@ class Arena implements Listener {
         $player->getArmorInventory()->clearAll();
         $player->getCursorInventory()->clearAll();
 
-        $player->setGamemode($player::ADVENTURE);
+        $player->setGamemode(GameMode::ADVENTURE());
         $player->setHealth(20);
-        $player->setFood(20);
+        $player->getHungerManager()->setFood(20);
 
         $this->broadcastMessage("§a> {$player->getName()} joined the game! §7[".count($this->players)."/{$this->data["slots"]}]");
     }
@@ -168,18 +166,18 @@ class Arena implements Listener {
                 break;
         }
 
-        $player->removeAllEffects();
+        $player->getEffects()->clear();
 
-        $player->setGamemode($this->plugin->getServer()->getDefaultGamemode());
+        $player->setGamemode($this->plugin->getServer()->getGamemode());
 
         $player->setHealth(20);
-        $player->setFood(20);
+        $player->getHungerManager()->setFood(20);
 
         $player->getInventory()->clearAll();
         $player->getArmorInventory()->clearAll();
         $player->getCursorInventory()->clearAll();
 
-        $player->teleport($this->plugin->getServer()->getDefaultLevel()->getSpawnLocation());
+        $player->teleport($this->plugin->getServer()->getWorldManager()->getDefaultWorld()->getSpawnLocation());
 
         if(!$death) {
             $this->broadcastMessage("§a> {$player->getName()} left the game. §7[".count($this->players)."/{$this->data["slots"]}]");
@@ -194,7 +192,7 @@ class Arena implements Listener {
         $players = [];
         foreach ($this->players as $player) {
             $players[$player->getName()] = $player;
-            $player->setGamemode($player::SURVIVAL);
+            $player->setGamemode(GameMode::SURVIVAL());
         }
 
 
@@ -217,8 +215,11 @@ class Arena implements Listener {
             return;
         }
 
-        $player->addTitle("§aYOU WON!");
-        $this->plugin->getServer()->getPluginManager()->callEvent(new PlayerArenaWinEvent($this->plugin, $player, $this));
+        $player->sendTitle("§aYOU WON!");
+
+        $ev = new PlayerArenaWinEvent($this->plugin, $player, $this);
+        $ev->call();
+
         $this->plugin->getServer()->broadcastMessage("§a[SkyWars] Player {$player->getName()} has won the game at {$this->level->getFolderName()}!");
         $this->phase = self::PHASE_RESTART;
     }
@@ -260,7 +261,7 @@ class Arena implements Listener {
                     $player->sendPopup($message);
                     break;
                 case self::MSG_TITLE:
-                    $player->addTitle($message, $subMessage);
+                    $player->sendTitle($message, $subMessage);
                     break;
             }
         }
@@ -273,11 +274,12 @@ class Arena implements Listener {
         return count($this->players) <= 1;
     }
 
-    public function fillChests() {
+    public function fillChests()
+    {
 
         $fillInv = function (ChestInventory $inv) {
             $fillSlot = function (ChestInventory $inv, int $slot) {
-                $id = self::getChestItems()[$index = rand(0, 4)][rand(0, (int)(count(self::getChestItems()[$index])-1))];
+                $id = self::getChestItems()[$index = rand(0, 4)][rand(0, (int)(count(self::getChestItems()[$index]) - 1))];
                 switch ($index) {
                     case 0:
                         $count = 1;
@@ -298,22 +300,24 @@ class Arena implements Listener {
                         $count = 0;
                         break;
                 }
-                $inv->setItem($slot, Item::get($id, 0, $count));
+                $inv->setItem($slot, ItemFactory::getInstance()->get($id, 0, $count));
             };
 
             $inv->clearAll();
 
-            for($x = 0; $x <= 26; $x++) {
-                if(rand(1, 3) == 1) {
+            for ($x = 0; $x <= 26; $x++) {
+                if (rand(1, 3) == 1) {
                     $fillSlot($inv, $x);
                 }
             }
         };
 
         $level = $this->level;
-        foreach ($level->getTiles() as $tile) {
-            if($tile instanceof Chest) {
-                $fillInv($tile->getInventory());
+        foreach ($level->getLoadedChunks() as $chunk) {
+            foreach ($chunk->getTiles() as $tile) {
+                if ($tile instanceof Chest) {
+                    $fillInv($tile->getInventory());
+                }
             }
         }
     }
@@ -331,7 +335,7 @@ class Arena implements Listener {
                     $index = $i;
                 }
             }
-            if($event->getPlayer()->asVector3()->distance(Vector3::fromString($this->data["spawns"][$index])) > 1) {
+            if($event->getPlayer()->getPosition()->asVector3()->distance(Vector3::fromString($this->data["spawns"][$index])) > 1) {
                 // $event->setCancelled() wont work
                 $player->teleport(Vector3::fromString($this->data["spawns"][$index]));
             }
@@ -347,7 +351,7 @@ class Arena implements Listener {
         if(!$player instanceof Player) return;
 
         if($this->inGame($player) && $this->phase == self::PHASE_LOBBY) {
-            $event->setCancelled(true);
+            $event->cancel();
         }
     }
 
@@ -358,18 +362,18 @@ class Arena implements Listener {
         $player = $event->getPlayer();
         $block = $event->getBlock();
 
-        if($this->inGame($player) && $event->getBlock()->getId() == Block::CHEST && $this->phase == self::PHASE_LOBBY) {
-            $event->setCancelled(true);
+        if($this->inGame($player) && $event->getBlock()->getId() == BlockLegacyIds::CHEST && $this->phase == self::PHASE_LOBBY) {
+            $event->cancel();
             return;
         }
 
-        if(!$block->getLevel()->getTile($block) instanceof Tile) {
+        if(!$block->getPosition()->getWorld()->getTile($block->getPosition()) instanceof Tile) {
             return;
         }
 
-        $signPos = Position::fromObject(Vector3::fromString($this->data["joinsign"][0]), $this->plugin->getServer()->getLevelByName($this->data["joinsign"][1]));
+        $signPos = Position::fromObject(Vector3::fromString($this->data["joinsign"][0]), $this->plugin->getServer()->getWorldManager()->getWorldByName($this->data["joinsign"][1]));
 
-        if((!$signPos->equals($block)) || $signPos->getLevel()->getId() != $block->getLevel()->getId()) {
+        if((!$signPos->equals($block->getPosition()->asVector3())) || $signPos->getWorld()->getId() != $block->getPosition()->getWorld()->getId()) {
             return;
         }
 
@@ -398,7 +402,7 @@ class Arena implements Listener {
         if(!$this->inGame($player)) return;
 
         foreach ($event->getDrops() as $item) {
-            $player->getLevel()->dropItem($player, $item);
+            $player->getWorld()->dropItem($player->getPosition()->asVector3(), $item);
         }
         $this->toRespawn[$player->getName()] = $player;
         $this->disconnectPlayer($player, "", true);
@@ -421,7 +425,7 @@ class Arena implements Listener {
     public function onRespawn(PlayerRespawnEvent $event) {
         $player = $event->getPlayer();
         if(isset($this->toRespawn[$player->getName()])) {
-            $event->setRespawnPosition($this->plugin->getServer()->getDefaultLevel()->getSpawnLocation());
+            $event->setRespawnPosition($this->plugin->getServer()->getWorldManager()->getDefaultWorld()->getSpawnLocation());
             unset($this->toRespawn[$player->getName()]);
         }
     }
@@ -436,9 +440,9 @@ class Arena implements Listener {
     }
 
     /**
-     * @param EntityLevelChangeEvent $event
+     * @param EntityTeleportEvent $event
      */
-    public function onLevelChange(EntityLevelChangeEvent $event) {
+    public function onEntityTeleport(EntityTeleportEvent $event) {
         $player = $event->getEntity();
         if(!$player instanceof Player) return;
         if($this->inGame($player)) {
@@ -470,9 +474,9 @@ class Arena implements Listener {
             $this->level = $this->mapReset->loadMap($this->data["level"]);
         }
 
-        if(!$this->level instanceof Level) {
+        if(!$this->level instanceof World) {
             $level = $this->mapReset->loadMap($this->data["level"]);
-            if(!$level instanceof Level) {
+            if(!$level instanceof World) {
                 $this->plugin->getLogger()->error("Arena level wasn't found. Try save level in setup mode.");
                 $this->setup = true;
                 return;
@@ -496,7 +500,7 @@ class Arena implements Listener {
         if($this->data["level"] == null) {
             return false;
         }
-        if(!$this->plugin->getServer()->isLevelGenerated($this->data["level"])) {
+        if(!$this->plugin->getServer()->getWorldManager()->isWorldGenerated($this->data["level"])) {
             return false;
         }
         if(!is_int($this->data["slots"])) {

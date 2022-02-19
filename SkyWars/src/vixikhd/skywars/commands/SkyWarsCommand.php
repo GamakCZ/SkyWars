@@ -22,8 +22,7 @@ namespace vixikhd\skywars\commands;
 
 use pocketmine\command\Command;
 use pocketmine\command\CommandSender;
-use pocketmine\command\PluginIdentifiableCommand;
-use pocketmine\Player;
+use pocketmine\player\Player;
 use pocketmine\plugin\Plugin;
 use pocketmine\plugin\PluginBase;
 use vixikhd\skywars\arena\Arena;
@@ -33,7 +32,7 @@ use vixikhd\skywars\SkyWars;
  * Class SkyWarsCommand
  * @package skywars\commands
  */
-class SkyWarsCommand extends Command implements PluginIdentifiableCommand {
+class SkyWarsCommand extends Command {
 
     /** @var SkyWars $plugin */
     protected $plugin;
@@ -111,7 +110,9 @@ class SkyWarsCommand extends Command implements PluginIdentifiableCommand {
                 $arena = $this->plugin->arenas[$args[1]];
 
                 foreach ($arena->players as $player) {
-                    $player->teleport($this->plugin->getServer()->getDefaultLevel()->getSpawnLocation());
+                    if ($player instanceof Player) {
+                        $player->teleport($this->plugin->getServer()->getWorldManager()->getDefaultWorld()->getSpawnLocation());
+                    }
                 }
 
                 if(is_file($file = $this->plugin->getDataFolder() . "arenas" . DIRECTORY_SEPARATOR . $args[1] . ".yml")) unlink($file);
@@ -177,9 +178,9 @@ class SkyWarsCommand extends Command implements PluginIdentifiableCommand {
     }
 
     /**
-     * @return SkyWars|Plugin $plugin
+     * @return SkyWars $plugin
      */
-    public function getPlugin(): Plugin {
+    public function getPlugin(): SkyWars {
         return $this->plugin;
     }
 

@@ -21,7 +21,7 @@ declare(strict_types=1);
 namespace vixikhd\skywars\event;
 
 use pocketmine\event\plugin\PluginEvent;
-use pocketmine\Player;
+use pocketmine\player\Player;
 use vixikhd\skywars\arena\Arena;
 use vixikhd\skywars\SkyWars;
 
