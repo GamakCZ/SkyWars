@@ -66,7 +66,7 @@ class MapReset {
             }
         }
 
-        $zip->close();
+        if (file_exists($this->plugin->plugin->getDataFolder() . "saves" . DIRECTORY_SEPARATOR . $level->getFolderName() . ".zip")) $zip->close();
     }
 
     /**
