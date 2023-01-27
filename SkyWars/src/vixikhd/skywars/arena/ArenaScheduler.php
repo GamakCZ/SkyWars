@@ -134,7 +134,7 @@ class ArenaScheduler extends Task {
 
         $signPos = Position::fromObject(Vector3::fromString($this->plugin->data["joinsign"][0]), $this->plugin->plugin->getServer()->getWorldManager()->getWorldByName($this->plugin->data["joinsign"][1]));
 
-        if(!$signPos->getWorld() instanceof World || is_null($this->plugin->level)) return;
+        if(!$signPos->getWorld() instanceof World || is_null($this->plugin->level) || !$signPos->isValid()) return;
 
         $signText = [
             "§e§lSkyWars",
