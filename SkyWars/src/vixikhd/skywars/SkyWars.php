@@ -24,7 +24,7 @@ use pocketmine\command\Command;
 use pocketmine\event\block\BlockBreakEvent;
 use pocketmine\event\Listener;
 use pocketmine\event\player\PlayerChatEvent;
-use pocketmine\level\Level;
+use pocketmine\world\World;
 use pocketmine\plugin\PluginBase;
 use vixikhd\skywars\arena\Arena;
 use vixikhd\skywars\arena\MapReset;
@@ -53,13 +53,13 @@ class SkyWars extends PluginBase implements Listener {
     /** @var int[] $setupData */
     public $setupData = [];
 
-    public function onEnable() {
+    public function onEnable(): void {
         $this->getServer()->getPluginManager()->registerEvents($this, $this);
         $this->dataProvider = new YamlDataProvider($this);
         $this->getServer()->getCommandMap()->register("SkyWars", $this->commands[] = new SkyWarsCommand($this));
     }
 
-    public function onDisable() {
+    public function onDisable(): void {
         $this->dataProvider->saveArenas();
     }
 
@@ -73,7 +73,7 @@ class SkyWars extends PluginBase implements Listener {
             return;
         }
 
-        $event->setCancelled(\true);
+        $event->cancel();
         $args = explode(" ", $event->getMessage());
 
         /** @var Arena $arena */
@@ -103,7 +103,7 @@ class SkyWars extends PluginBase implements Listener {
                     $player->sendMessage("§cUsage: §7level <levelName>");
                     break;
                 }
-                if(!$this->getServer()->isLevelGenerated($args[1])) {
+                if(!$this->getServer()->getWorldManager()->isWorldGenerated($args[1])) {
                     $player->sendMessage("§c> Level $args[1] does not found!");
                     break;
                 }
@@ -124,17 +124,17 @@ class SkyWars extends PluginBase implements Listener {
                     break;
                 }
 
-                $arena->data["spawns"]["spawn-{$args[1]}"] = (new Vector3($player->getX(), $player->getY(), $player->getZ()))->__toString();
-                $player->sendMessage("§a> Spawn $args[1] set to X: " . (string)round($player->getX()) . " Y: " . (string)round($player->getY()) . " Z: " . (string)round($player->getZ()));
+                $arena->data["spawns"]["spawn-{$args[1]}"] = (new Vector3($player->getPosition()->getX(), $player->getPosition()->getY(), $player->getPosition()->getZ()))->__toString();
+                $player->sendMessage("§a> Spawn $args[1] set to X: " . (string)round($player->getPosition()->getX()) . " Y: " . (string)round($player->getPosition()->getY()) . " Z: " . (string)round($player->getPosition()->getZ()));
                 break;
             case "joinsign":
                 $player->sendMessage("§a> Break block to set join sign!");
                 $this->setupData[$player->getName()] = 0;
                 break;
             case "savelevel":
-                if(!$arena->level instanceof Level) {
+                if(!$arena->level instanceof World) {
                     $levelName = $arena->data["level"];
-                    if(!is_string($levelName) || !$this->getServer()->isLevelGenerated($levelName)) {
+                    if(!is_string($levelName) || !$this->getServer()->getWorldManager()->isWorldGenerated($levelName)) {
                         errorMessage:
                         $player->sendMessage("§c> Error while saving the level: world not found.");
                         if($arena->setup) {
@@ -142,15 +142,15 @@ class SkyWars extends PluginBase implements Listener {
                         }
                         return;
                     }
-                    if(!$this->getServer()->isLevelLoaded($levelName)) {
-                        $this->getServer()->loadLevel($levelName);
+                    if(!$this->getServer()->getWorldManager()->isWorldLoaded($levelName)) {
+                        $this->getServer()->getWorldManager()->loadWorld($levelName, true);
                     }
 
                     try {
                         if(!$arena->mapReset instanceof MapReset) {
                             goto errorMessage;
                         }
-                        $arena->mapReset->saveMap($this->getServer()->getLevelByName($levelName));
+                        $arena->mapReset->saveMap($this->getServer()->getWorldManager()->getWorldByName($levelName));
                         $player->sendMessage("§a> Level saved!");
                     }
                     catch (\Exception $exception) {
@@ -170,12 +170,12 @@ class SkyWars extends PluginBase implements Listener {
                     break;
                 }
 
-                if($this->getServer()->isLevelGenerated($arena->data["level"])) {
-                    if(!$this->getServer()->isLevelLoaded($arena->data["level"]))
-                        $this->getServer()->loadLevel($arena->data["level"]);
+                if($this->getServer()->getWorldManager()->isWorldGenerated($arena->data["level"])) {
+                    if(!$this->getServer()->getWorldManager()->isWorldLoaded($arena->data["level"]))
+                        $this->getServer()->getWorldManager()->loadWorld($arena->data["level"], true);
                     if(!$arena->mapReset instanceof MapReset)
                         $arena->mapReset = new MapReset($arena);
-                    $arena->mapReset->saveMap($this->getServer()->getLevelByName($arena->data["level"]));
+                    $arena->mapReset->saveMap($this->getServer()->getWorldManager()->getWorldByName($arena->data["level"]));
                 }
 
                 $arena->loadArena(false);
@@ -205,10 +205,10 @@ class SkyWars extends PluginBase implements Listener {
         if(isset($this->setupData[$player->getName()])) {
             switch ($this->setupData[$player->getName()]) {
                 case 0:
-                    $this->setters[$player->getName()]->data["joinsign"] = [(new Vector3($block->getX(), $block->getY(), $block->getZ()))->__toString(), $block->getLevel()->getFolderName()];
+                    $this->setters[$player->getName()]->data["joinsign"] = [(new Vector3($block->getPosition()->getX(), $block->getPosition()->getY(), $block->getPosition()->getZ()))->__toString(), $block->getPosition()->getWorld()->getFolderName()];
                     $player->sendMessage("§a> Join sign updated!");
                     unset($this->setupData[$player->getName()]);
-                    $event->setCancelled(\true);
+                    $event->cancel();
                     break;
             }
         }

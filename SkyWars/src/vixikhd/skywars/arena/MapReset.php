@@ -20,7 +20,7 @@ declare(strict_types=1);
 
 namespace vixikhd\skywars\arena;
 
-use pocketmine\level\Level;
+use pocketmine\world\World;
 
 /**
  * Class MapReset
@@ -40,9 +40,9 @@ class MapReset {
     }
 
     /**
-     * @param Level $level
+     * @param World $level
      */
-    public function saveMap(Level $level) {
+    public function saveMap(World $level) {
         $level->save(true);
 
         $levelPath = $this->plugin->plugin->getServer()->getDataPath() . "worlds" . DIRECTORY_SEPARATOR . $level->getFolderName();
@@ -66,22 +66,22 @@ class MapReset {
             }
         }
 
-        $zip->close();
+        if (file_exists($this->plugin->plugin->getDataFolder() . "saves" . DIRECTORY_SEPARATOR . $level->getFolderName() . ".zip")) $zip->close();
     }
 
     /**
      * @param string $folderName
      * @param bool $justSave
      *
-     * @return Level|null
+     * @return World|null
      */
-    public function loadMap(string $folderName, bool $justSave = false): ?Level {
-        if(!$this->plugin->plugin->getServer()->isLevelGenerated($folderName)) {
+    public function loadMap(string $folderName, bool $justSave = false): ?World {
+        if(!$this->plugin->plugin->getServer()->getWorldManager()->isWorldGenerated($folderName)) {
             return null;
         }
 
-        if($this->plugin->plugin->getServer()->isLevelLoaded($folderName)) {
-            $this->plugin->plugin->getServer()->getLevelByName($folderName)->unload(true);
+        if($this->plugin->plugin->getServer()->getWorldManager()->isWorldLoaded($folderName)) {
+            $this->plugin->plugin->getServer()->getWorldManager()->unloadWorld($this->plugin->plugin->getServer()->getWorldManager()->getWorldByName($folderName));
         }
 
         $zipPath = $this->plugin->plugin->getDataFolder() . "saves" . DIRECTORY_SEPARATOR . $folderName . ".zip";
@@ -100,7 +100,7 @@ class MapReset {
             return null;
         }
 
-        $this->plugin->plugin->getServer()->loadLevel($folderName);
-        return $this->plugin->plugin->getServer()->getLevelByName($folderName);
+        $this->plugin->plugin->getServer()->getWorldManager()->loadWorld($folderName, true);
+        return $this->plugin->plugin->getServer()->getWorldManager()->getWorldByName($folderName);
     }
 }
